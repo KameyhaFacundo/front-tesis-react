@@ -33,7 +33,7 @@ export default function Login({ navigation }) {
           text: 'OK',
           onPress: () => {
             setLogueado(true);
-            navigation.replace('Profesionales');
+            navigation.replace('Home');
           },
         },
       ]);

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Text, View, Button, StyleSheet, ScrollView } from 'react-native';
-import { obtenerProfesionales } from './src/api/profesionales';
+import { obtenerProfesionales } from '../../api/profesionales';
 
 export default function App() {
   const [profesionales, setProfesionales] = useState([]);

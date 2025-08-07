@@ -1,41 +1,66 @@
-import React, { useState } from 'react';
-import { Text, View, Button, StyleSheet, ScrollView } from 'react-native';
-
-// ⚠️ Asegurate de reemplazar esta IP con la IP local de tu PC
-const API_URL = 'http://192.168.101.76:3000/api/profesionales/listar';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { obtenerUsuarios } from './src/api/usuarios';
 
 export default function App() {
-  const [profesionales, setProfesionales] = useState([]);
-  const [error, setError] = useState(null);
+  const [usuarios, setUsuarios] = useState([]);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [logueado, setLogueado] = useState(false);
 
-  const obtenerProfesionales = async () => {
-    try {
-      const response = await fetch(API_URL);
-      if (!response.ok) throw new Error('Error al obtener profesionales');
-      const data = await response.json();
-      setProfesionales(data);
-      setError(null);
-    } catch (err) {
-      setError(err.message);
-      setProfesionales([]);
-    }
-  };
+  useEffect(() => {
+    const fetchUsuarios = async () => {
+      try {
+        const data = await obtenerUsuarios();
+        setUsuarios(data);
+      } catch (error) {
+        Alert.alert('Error', 'No se pudieron cargar los usuarios');
+        console.error(error);
+      }
+    };
+
+    fetchUsuarios();
+  }, []);
+
+const handleLogin = () => {
+  const user = usuarios.find(
+    (u) => u.CorreoElectronico === username && u.Password === password
+  );
+
+  if (user) {
+    setLogueado(true);
+    Alert.alert('Éxito', `Bienvenido, ${user.Nombre}`);
+  } else {
+    Alert.alert('Error', 'Correo o contraseña incorrectos');
+  }
+};
+
+
+  if (logueado) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Estás logueado como {username}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Lista de Profesionales</Text>
-      <Button title="Cargar Profesionales" onPress={obtenerProfesionales} />
-      {error && <Text style={styles.error}>Error: {error}</Text>}
-      <ScrollView style={styles.scroll}>
-        {profesionales.map((p) => (
-          <View key={p.IdUsuario} style={styles.card}>
-            <Text style={styles.name}>{p.Nombre} {p.Apellido}</Text>
-            <Text>Email: {p.CorreoElectronico}</Text>
-            <Text>Tel: {p.Telefono}</Text>
-            <Text>Dirección: {p.Domicilio}</Text>
-          </View>
-        ))}
-      </ScrollView>
+      <Text style={styles.title}>Login</Text>
+      <TextInput
+        placeholder="Correo electrónico"
+        style={styles.input}
+        value={username}
+        onChangeText={setUsername}
+      />
+      <TextInput
+        placeholder="Password"
+        style={styles.input}
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
+      <Button title="Iniciar Sesión" onPress={handleLogin} />
     </View>
   );
 }
@@ -43,33 +68,19 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 50,
-    paddingHorizontal: 20,
-    backgroundColor: '#fff',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#888',
+    padding: 10,
+    marginVertical: 10,
+    borderRadius: 5,
   },
   title: {
-    fontSize: 22,
-    fontWeight: 'bold',
+    fontSize: 24,
     marginBottom: 20,
     textAlign: 'center',
   },
-  error: {
-    color: 'red',
-    marginVertical: 10,
-    textAlign: 'center',
-  },
-  scroll: {
-    marginTop: 20,
-  },
-  card: {
-    marginBottom: 15,
-    padding: 10,
-    backgroundColor: '#f3f3f3',
-    borderRadius: 8,
-  },
-  name: {
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
 });
-

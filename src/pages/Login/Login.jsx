@@ -23,6 +23,7 @@ export default function Login({ navigation }) {
   }, []);
 
   const handleLogin = () => {
+    alert(`Intentando iniciar sesión con: ${username} y ${password}`);
     const user = usuarios.find(
       (u) => u.CorreoElectronico === username && u.Password === password
     );

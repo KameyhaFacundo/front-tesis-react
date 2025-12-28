@@ -62,7 +62,6 @@ const CustomDrawer = ({ visible, onClose, navigation, currentRoute }) => {
 
   const handleNavigate = (route) => {
     onClose();
-    // Pequeño delay para que se cierre el drawer antes de navegar
     setTimeout(() => {
       if (navigation && navigation.navigate) {
         navigation.navigate(route);

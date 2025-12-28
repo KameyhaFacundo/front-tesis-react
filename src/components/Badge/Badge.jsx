@@ -5,8 +5,8 @@ import styles from './Badge.styles';
 
 const Badge = ({
   text,
-  type = 'default', // default, success, warning, error, info, completed, pending, inProgress
-  size = 'medium', // small, medium, large
+  type = 'default',
+  size = 'medium', 
   style,
 }) => {
   const getTypeStyles = () => {

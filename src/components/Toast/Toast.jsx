@@ -10,7 +10,6 @@ const Toast = ({ visible, message, type = 'success', onHide, duration = 3000 }) 
 
   useEffect(() => {
     if (visible) {
-      // Animar entrada
       Animated.parallel([
         Animated.spring(translateY, {
           toValue: 0,
@@ -25,7 +24,6 @@ const Toast = ({ visible, message, type = 'success', onHide, duration = 3000 }) 
         }),
       ]).start();
 
-      // Auto-hide después de duration
       const timer = setTimeout(() => {
         hideToast();
       }, duration);

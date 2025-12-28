@@ -62,7 +62,6 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
   },
 
-  // User Profile Card
   userProfileCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -99,7 +98,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Navigation
   navLabel: {
     ...FONTS.small,
     fontWeight: '700',
@@ -131,7 +129,6 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
   },
 
-  // Logout
   logoutItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -148,7 +145,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Footer
   drawerFooter: {
     padding: SIZES.lg,
     borderTopWidth: 1,

@@ -7,7 +7,7 @@ const Card = ({
   children,
   style,
   onPress,
-  variant = 'default', // default, elevated, outlined
+  variant = 'default',
   padding = SIZES.md,
 }) => {
   const getVariantStyles = () => {

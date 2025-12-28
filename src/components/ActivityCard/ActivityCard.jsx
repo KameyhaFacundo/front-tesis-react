@@ -128,14 +128,12 @@ const ActivityCard = ({
           </View>
         </View>
 
-        {/* Description */}
         {description && (
           <Text style={styles.description} numberOfLines={2}>
             {description}
           </Text>
         )}
 
-        {/* Info Row */}
         <View style={styles.infoRow}>
           <View style={styles.infoItem}>
             <View style={styles.infoIcon}>
@@ -156,7 +154,6 @@ const ActivityCard = ({
           )}
         </View>
 
-        {/* Assigned By */}
         {assignedBy && (
           <View style={styles.assignedRow}>
             <View style={styles.assignedIcon}>

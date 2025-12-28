@@ -24,7 +24,6 @@ const styles = StyleSheet.create({
     padding: SIZES.md,
   },
 
-  // Header
   header: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -53,7 +52,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // Description
   description: {
     ...FONTS.body,
     fontSize: 14,
@@ -62,7 +60,6 @@ const styles = StyleSheet.create({
     marginBottom: SIZES.md,
   },
 
-  // Info Row
   infoRow: {
     flexDirection: 'row',
     gap: SIZES.lg,
@@ -85,7 +82,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Assigned Row
   assignedRow: {
     flexDirection: 'row',
     alignItems: 'center',

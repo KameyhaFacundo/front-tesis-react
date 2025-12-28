@@ -93,37 +93,25 @@ export default function Login({ navigation }) {
   };
 
   const handleLogin = async () => {
-    console.log('=== INICIANDO LOGIN ===');
-    console.log('Email ingresado:', email);
-    console.log('Password ingresado:', password);
-    console.log('Total usuarios disponibles:', usuarios.length);
 
     if (!validateForm()) {
-      console.log('Validación de formulario falló');
       return;
     }
 
-    console.log('Validación exitosa, procediendo con login...');
     setLoading(true);
 
     try {
-      // Simular delay de red
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      console.log('Buscando usuario en la lista...');
       const user = usuarios.find(
         (u) => u.CorreoElectronico?.toLowerCase() === email.toLowerCase() &&
                u.Password === password
       );
 
-      console.log('Usuario encontrado:', user);
 
       if (user) {
-        console.log('✅ Login exitoso! Navegando a Home...');
-        // Aquí podrías guardar el usuario en contexto/AsyncStorage
         navigation.replace('Home', { user });
       } else {
-        console.log('❌ Login fallido: Usuario no encontrado');
         Alert.alert(
           'Error de inicio de sesión',
           'El correo electrónico o la contraseña son incorrectos. Por favor, inténtalo de nuevo.'
@@ -134,14 +122,12 @@ export default function Login({ navigation }) {
       Alert.alert('Error', 'Ocurrió un error al intentar iniciar sesión');
     } finally {
       setLoading(false);
-      console.log('=== FIN LOGIN ===');
     }
   };
 
   
   return (
     <View style={styles.container}>
-      {/* Background Gradient Effect */}
       <LinearGradient
         colors={['rgba(74, 144, 226, 0.08)', 'transparent']}
         style={styles.backgroundTop}
@@ -160,7 +146,6 @@ export default function Login({ navigation }) {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Hero Section */}
           <View style={styles.heroSection}>
             <Animated.View
               style={[
@@ -209,7 +194,6 @@ export default function Login({ navigation }) {
             </View>
           </View>
 
-          {/* Login Card */}
           <Animated.View
             style={[
               styles.loginCard,
@@ -220,7 +204,6 @@ export default function Login({ navigation }) {
             ]}
           >
             <View style={styles.cardHeader}>
-              <Text style={styles.welcomeText}>Bienvenido de nuevo</Text>
               <Text style={styles.instructionText}>
                 Ingresa tus credenciales para continuar
               </Text>
@@ -279,15 +262,7 @@ export default function Login({ navigation }) {
             </View>
           </Animated.View>
 
-          {/* Footer Info */}
           <View style={styles.footerInfo}>
-            <View style={styles.securityBadge}>
-              <Ionicons name="lock-closed" size={14} color={COLORS.textSecondary} />
-              <Text style={styles.securityText}>
-                Tus datos están protegidos con encriptación SSL
-              </Text>
-            </View>
-
             <Text style={styles.versionText}>Versión 1.0.0</Text>
           </View>
         </ScrollView>

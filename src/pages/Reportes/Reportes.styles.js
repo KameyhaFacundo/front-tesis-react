@@ -1,0 +1,358 @@
+import { StyleSheet } from 'react-native';
+import { COLORS, SIZES, FONTS } from '../../constants/theme';
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F8FAFE',
+  },
+  gradient: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFE',
+  },
+  loadingText: {
+    ...FONTS.body,
+    color: COLORS.textSecondary,
+    marginTop: SIZES.md,
+  },
+  header: {
+    paddingHorizontal: SIZES.lg,
+    paddingVertical: SIZES.md,
+  },
+  headerTitle: {
+    ...FONTS.h3,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: SIZES.lg,
+  },
+  reportCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: SIZES.radiusLarge,
+    padding: SIZES.lg,
+    marginBottom: SIZES.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  reportHeader: {
+    flexDirection: 'row',
+    gap: SIZES.md,
+  },
+  progressCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+  },
+  progressText: {
+    ...FONTS.bodyBold,
+    fontWeight: '800',
+    color: COLORS.text,
+  },
+  reportInfo: {
+    flex: 1,
+  },
+  reportTitle: {
+    ...FONTS.bodyBold,
+    fontSize: 16,
+    marginBottom: SIZES.xs,
+  },
+  reportDescription: {
+    ...FONTS.caption,
+    color: COLORS.textSecondary,
+    marginBottom: SIZES.sm,
+  },
+  reportMeta: {
+    flexDirection: 'row',
+    gap: SIZES.md,
+    marginBottom: SIZES.xs,
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SIZES.xs / 2,
+  },
+  metaText: {
+    ...FONTS.small,
+    color: COLORS.textSecondary,
+  },
+  attachmentsBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SIZES.xs / 2,
+    alignSelf: 'flex-start',
+    paddingHorizontal: SIZES.sm,
+    paddingVertical: SIZES.xs / 2,
+    borderRadius: SIZES.radiusSmall,
+    backgroundColor: COLORS.primaryLight,
+  },
+  attachmentsText: {
+    ...FONTS.small,
+    color: COLORS.info,
+    fontWeight: '600',
+  },
+  deleteButton: {
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: SIZES.xxl,
+  },
+  emptyStateText: {
+    ...FONTS.h4,
+    color: COLORS.textSecondary,
+    marginTop: SIZES.lg,
+  },
+  emptyStateSubtext: {
+    ...FONTS.caption,
+    color: COLORS.textLight,
+    marginTop: SIZES.xs,
+    textAlign: 'center',
+  },
+
+  // Modal
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#F8FAFE',
+  },
+  modalGradient: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: SIZES.lg,
+    paddingVertical: SIZES.md,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+    backgroundColor: COLORS.white,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalHeaderTitle: {
+    ...FONTS.h4,
+    fontWeight: '700',
+  },
+  modalScroll: {
+    flex: 1,
+  },
+  modalContent: {
+    paddingHorizontal: SIZES.lg,
+    paddingTop: SIZES.lg,
+  },
+  modalSection: {
+    marginBottom: SIZES.xl,
+  },
+  modalTitle: {
+    ...FONTS.h3,
+    fontWeight: '700',
+    marginBottom: SIZES.xs,
+  },
+  modalDescription: {
+    ...FONTS.body,
+    color: COLORS.textSecondary,
+    marginBottom: SIZES.md,
+  },
+  progressBar: {
+    marginTop: SIZES.md,
+  },
+  progressBarBg: {
+    height: 12,
+    backgroundColor: COLORS.border,
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 6,
+  },
+  progressBarText: {
+    ...FONTS.caption,
+    color: COLORS.textSecondary,
+    marginTop: SIZES.xs,
+    textAlign: 'center',
+  },
+  sectionTitle: {
+    ...FONTS.h4,
+    fontWeight: '700',
+    marginBottom: SIZES.md,
+  },
+  infoCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: SIZES.radiusLarge,
+    padding: SIZES.lg,
+    gap: SIZES.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SIZES.md,
+  },
+  infoContent: {
+    flex: 1,
+  },
+  infoLabel: {
+    ...FONTS.small,
+    color: COLORS.textSecondary,
+    marginBottom: SIZES.xs / 2,
+  },
+  infoValue: {
+    ...FONTS.body,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  observationsCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: SIZES.radiusLarge,
+    padding: SIZES.lg,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  observationsText: {
+    ...FONTS.body,
+    color: COLORS.text,
+    lineHeight: 24,
+  },
+  objetivoCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: SIZES.radiusMedium,
+    padding: SIZES.md,
+    marginBottom: SIZES.sm,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  objetivoHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SIZES.sm,
+  },
+  objetivoDescripcion: {
+    ...FONTS.body,
+    fontWeight: '600',
+    flex: 1,
+  },
+  objetivoEstado: {
+    paddingHorizontal: SIZES.sm,
+    paddingVertical: SIZES.xs / 2,
+    borderRadius: SIZES.radiusSmall,
+  },
+  objetivoEstadoText: {
+    ...FONTS.small,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+  },
+  objetivoProgress: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SIZES.sm,
+  },
+  objetivoProgressBar: {
+    flex: 1,
+    height: 8,
+    backgroundColor: COLORS.border,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  objetivoProgressFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  objetivoProgressText: {
+    ...FONTS.small,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+    width: 40,
+    textAlign: 'right',
+  },
+  adjuntoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SIZES.md,
+    backgroundColor: COLORS.white,
+    borderRadius: SIZES.radiusMedium,
+    padding: SIZES.md,
+    marginBottom: SIZES.sm,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  adjuntoIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: SIZES.radiusMedium,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  adjuntoInfo: {
+    flex: 1,
+  },
+  adjuntoNombre: {
+    ...FONTS.body,
+    fontWeight: '600',
+    marginBottom: SIZES.xs / 2,
+  },
+  adjuntoMeta: {
+    ...FONTS.small,
+    color: COLORS.textSecondary,
+  },
+  recommendationsCard: {
+    flexDirection: 'row',
+    gap: SIZES.md,
+    backgroundColor: '#FFF9E6',
+    borderRadius: SIZES.radiusMedium,
+    padding: SIZES.md,
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.warning,
+  },
+  recommendationsText: {
+    ...FONTS.body,
+    color: COLORS.text,
+    flex: 1,
+  },
+});
+export default styles;

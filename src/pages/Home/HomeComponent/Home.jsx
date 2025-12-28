@@ -135,40 +135,7 @@ function DefaultDashboard({ navigation }) {
     },
   ];
 
-  const quickActions = [
-    {
-      id: 1,
-      title: 'Nueva Actividad',
-      icon: 'add-circle',
-      color: COLORS.primary,
-      bgColor: COLORS.primaryLight,
-      route: 'Actividades'
-    },
-    {
-      id: 2,
-      title: 'Calendario',
-      icon: 'calendar',
-      color: COLORS.secondary,
-      bgColor: COLORS.secondaryLight,
-      route: 'Calendario'
-    },
-    {
-      id: 3,
-      title: 'Reportes',
-      icon: 'bar-chart',
-      color: COLORS.accent,
-      bgColor: COLORS.accentLight,
-      route: 'Reportes'
-    },
-    {
-      id: 4,
-      title: 'Ubicación',
-      icon: 'location',
-      color: COLORS.user,
-      bgColor: '#E8EAF6',
-      route: null
-    },
-  ];
+  // ...existing code...
 
   return (
     <View style={styles.container}>
@@ -177,7 +144,6 @@ function DefaultDashboard({ navigation }) {
         style={styles.gradient}
       />
 
-      {/* Custom Header */}
       <View style={styles.customHeader}>
         <TouchableOpacity
           onPress={() => setDrawerVisible(true)}
@@ -207,7 +173,6 @@ function DefaultDashboard({ navigation }) {
             transform: [{ translateY: slideAnim }],
           }}
         >
-          {/* Header Moderno */}
           <View style={styles.header}>
             <View style={styles.headerRow}>
               <View style={styles.headerLeft}>
@@ -221,7 +186,6 @@ function DefaultDashboard({ navigation }) {
             </View>
           </View>
 
-          {/* Stats Cards */}
           <View style={styles.statsContainer}>
             {stats.map((stat, index) => (
               <TouchableOpacity key={index} style={styles.statCard} activeOpacity={0.7}>
@@ -237,31 +201,8 @@ function DefaultDashboard({ navigation }) {
             ))}
           </View>
 
-          {/* Quick Actions Grid */}
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Acciones Rápidas</Text>
-              <Ionicons name="grid-outline" size={20} color={COLORS.textSecondary} />
-            </View>
+          {/* Acciones rápidas eliminadas */}
 
-            <View style={styles.quickActionsGrid}>
-              {quickActions.map((action) => (
-                <TouchableOpacity
-                  key={action.id}
-                  style={styles.actionCard}
-                  activeOpacity={0.7}
-                  onPress={() => action.route ? navigation.navigate(action.route) : Alert.alert(action.title, 'Funcionalidad en desarrollo')}
-                >
-                  <View style={[styles.actionIconWrapper, { backgroundColor: action.bgColor }]}>
-                    <Ionicons name={action.icon} size={32} color={action.color} />
-                  </View>
-                  <Text style={styles.actionTitle}>{action.title}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-
-          {/* Today's Activities */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <View style={styles.sectionHeaderLeft}>
@@ -292,7 +233,6 @@ function DefaultDashboard({ navigation }) {
         </Animated.View>
       </ScrollView>
 
-      {/* Custom Drawer */}
       <CustomDrawer
         visible={drawerVisible}
         onClose={() => setDrawerVisible(false)}
@@ -303,13 +243,11 @@ function DefaultDashboard({ navigation }) {
   );
 }
 
-// Pantallas adicionales
 function UsuariosScreen({ navigation }) {
   const [drawerVisible, setDrawerVisible] = useState(false);
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.customHeader}>
         <TouchableOpacity
           onPress={() => setDrawerVisible(true)}
@@ -344,7 +282,6 @@ function ProfesionalesScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.customHeader}>
         <TouchableOpacity
           onPress={() => setDrawerVisible(true)}

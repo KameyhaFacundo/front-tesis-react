@@ -6,7 +6,7 @@ import { calcularDistancia } from './ubicaciones';
 const ALERTAS_MOCK = [
   {
     ID: 1,
-    UsuarioID: 1, // Ana Martínez
+    UsuarioID: 4, // Ana Martínez
     NombreUsuario: 'Ana Martínez',
     Tipo: 'zona_segura',
     Severidad: 'critica',
@@ -25,13 +25,13 @@ let alertasActuales = [...ALERTAS_MOCK];
 
 // Configuración de zonas seguras por usuario
 const ZONAS_SEGURAS = {
-  1: { // Ana Martínez
+  4: { // Ana Martínez
     latitud: -34.6037,
     longitud: -58.3816,
     radio: 500, // metros
     nombre: 'Casa de Ana'
   },
-  2: { // Laura Fernández
+  5: { // Laura Fernández
     latitud: -34.6040,
     longitud: -58.3820,
     radio: 500,

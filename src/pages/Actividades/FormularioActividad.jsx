@@ -15,7 +15,7 @@ import { crearActividad, actualizarActividad } from '../../api/actividades';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function FormularioActividad({ actividad, usuarios, onClose, onSuccess }) {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [tipoSeleccionado, setTipoSeleccionado] = useState(
     actividad?.Tipo || 'medicine'
@@ -29,8 +29,8 @@ export default function FormularioActividad({ actividad, usuarios, onClose, onSu
     FechaInicio: actividad?.FechaInicio || '',
     FechaFin: actividad?.FechaFin || '',
     UsuarioID: actividad?.UsuarioID || '',
-    AsignadoPorID: user.ID,
-    AsignadoPor: `${user.Nombre} ${user.Apellido}`,
+    AsignadoPorID: user?.ID || null,
+    AsignadoPor: user ? `${user.Nombre} ${user.Apellido}` : '',
     Notas: actividad?.Notas || '',
     Recordatorio: actividad?.Recordatorio !== undefined ? actividad.Recordatorio : true,
     MinutosAntes: actividad?.MinutosAntes || 15,
@@ -60,6 +60,11 @@ export default function FormularioActividad({ actividad, usuarios, onClose, onSu
   const pcdUsuarios = usuarios.filter((u) => u.Rol === 'PCD');
 
   const guardarActividad = async () => {
+    if (!user?.ID) {
+      Alert.alert('Sesion no disponible', 'Volve a iniciar sesion para crear actividades');
+      return;
+    }
+
     // Validaciones
     if (!formData.Titulo.trim()) {
       Alert.alert('Error', 'El título es requerido');
@@ -111,6 +116,20 @@ export default function FormularioActividad({ actividad, usuarios, onClose, onSu
   const updateFormData = (field, value) => {
     setFormData({ ...formData, [field]: value });
   };
+
+  if (authLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={onClose} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Cargando...</Text>
+          <View style={{ width: 40 }} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>

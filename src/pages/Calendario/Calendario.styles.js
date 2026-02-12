@@ -4,7 +4,7 @@ import { COLORS, SIZES, FONTS } from '../../constants/theme';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFE',
+    backgroundColor: '#F4F8FF',
   },
   gradient: {
     position: 'absolute',
@@ -13,29 +13,63 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
   },
+  glowTop: {
+    position: 'absolute',
+    top: -120,
+    right: -80,
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    backgroundColor: 'rgba(91, 155, 255, 0.20)',
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F8FAFE',
+    backgroundColor: '#F4F8FF',
   },
   loadingText: {
     ...FONTS.body,
     color: COLORS.textSecondary,
     marginTop: SIZES.md,
   },
+  heroCard: {
+    borderRadius: 22,
+    padding: SIZES.lg,
+    marginHorizontal: SIZES.lg,
+    marginTop: SIZES.md,
+    marginBottom: SIZES.md,
+    shadowColor: '#0D3B8E',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  heroHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SIZES.sm,
+  },
+  heroTitle: {
+    ...FONTS.h4,
+    color: COLORS.white,
+    fontWeight: '700',
+  },
+  heroSubtitle: {
+    ...FONTS.caption,
+    color: '#DDEBFF',
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: SIZES.lg,
-    paddingVertical: SIZES.md,
   },
   monthButton: {
     width: 40,
     height: 40,
-    borderRadius: SIZES.radiusMedium,
-    backgroundColor: COLORS.primaryLight,
+    borderRadius: 12,
+    backgroundColor: '#E2EEFF',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -43,21 +77,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   monthText: {
-    ...FONTS.h3,
+    ...FONTS.h4,
     fontWeight: '700',
-    color: COLORS.text,
-    marginBottom: SIZES.xs,
+    color: COLORS.white,
   },
   todayButton: {
     paddingHorizontal: SIZES.md,
     paddingVertical: SIZES.xs / 2,
-    borderRadius: SIZES.radiusSmall,
-    backgroundColor: COLORS.primary,
+    borderRadius: 999,
+    backgroundColor: '#E2EEFF',
   },
   todayButtonText: {
     ...FONTS.small,
-    color: COLORS.white,
-    fontWeight: '600',
+    color: '#0D3B8E',
+    fontWeight: '700',
   },
   legend: {
     flexDirection: 'row',
@@ -78,7 +111,7 @@ const styles = StyleSheet.create({
   },
   legendText: {
     ...FONTS.small,
-    color: COLORS.textSecondary,
+    color: '#62708D',
   },
   scrollView: {
     flex: 1,
@@ -104,13 +137,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     backgroundColor: COLORS.white,
-    borderRadius: SIZES.radiusLarge,
+    borderRadius: 16,
     padding: SIZES.xs,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#E4ECFA',
+    shadowColor: '#112147',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+    elevation: 2,
   },
   dayCell: {
     width: `${100 / 7}%`,
@@ -122,7 +157,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   dayCellToday: {
-    backgroundColor: COLORS.primaryLight,
+    backgroundColor: '#EAF1FF',
   },
   dayCellEmpty: {
     opacity: 0,
@@ -130,7 +165,7 @@ const styles = StyleSheet.create({
   dayNumber: {
     ...FONTS.body,
     fontWeight: '600',
-    color: COLORS.text,
+    color: '#1B284A',
   },
   dayNumberToday: {
     color: COLORS.primary,
@@ -168,6 +203,7 @@ const styles = StyleSheet.create({
     ...FONTS.h4,
     fontWeight: '700',
     marginBottom: SIZES.md,
+    color: '#1A2752',
   },
   summaryCards: {
     flexDirection: 'row',
@@ -178,14 +214,16 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: '45%',
     backgroundColor: COLORS.white,
-    borderRadius: SIZES.radiusLarge,
+    borderRadius: 16,
     padding: SIZES.lg,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#E4ECFA',
+    shadowColor: '#112147',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+    elevation: 2,
   },
   summaryValue: {
     ...FONTS.h2,
@@ -194,20 +232,18 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     ...FONTS.caption,
-    color: COLORS.textSecondary,
+    color: '#62708D',
     textAlign: 'center',
   },
-
-  // Modal
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(10, 20, 38, 0.5)',
     justifyContent: 'flex-end',
   },
   modalContent: {
     backgroundColor: COLORS.white,
-    borderTopLeftRadius: SIZES.radiusLarge * 1.5,
-    borderTopRightRadius: SIZES.radiusLarge * 1.5,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     maxHeight: '70%',
     paddingTop: SIZES.lg,
   },
@@ -232,4 +268,5 @@ const styles = StyleSheet.create({
     marginBottom: SIZES.md,
   },
 });
+
 export default styles;

@@ -22,7 +22,7 @@ import {
 import { verificarYResolverAlertas } from '../../api/alertas';
 
 export default function Mapa({ route }) {
-  const { user, isPCD } = useAuth();
+  const { user, isPCD, loading: authLoading } = useAuth();
   const [location, setLocation] = useState(null);
   const [ubicaciones, setUbicaciones] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,11 +31,13 @@ export default function Mapa({ route }) {
   const { pcdId, pcdNombre } = route?.params || {};
 
   useEffect(() => {
+    if (authLoading || !user?.ID) return;
     solicitarPermisos();
     cargarUbicaciones();
-  }, []);
+  }, [authLoading, user?.ID]);
 
   const solicitarPermisos = async () => {
+    if (!user?.ID) return;
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
 
@@ -58,6 +60,11 @@ export default function Mapa({ route }) {
   };
 
   const obtenerUbicacionActual = async () => {
+    if (!user?.ID) {
+      setErrorMsg('Sesion no disponible. Volve a iniciar sesion.');
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const currentLocation = await Location.getCurrentPositionAsync({
@@ -119,7 +126,7 @@ export default function Mapa({ route }) {
     }
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={COLORS.primary} />
@@ -179,7 +186,7 @@ export default function Mapa({ route }) {
         <View style={[styles.legend, { position: 'relative', bottom: 0, left: 0, right: 0 }]}>
           <Text style={[styles.infoPanelTitle, { marginBottom: 8 }]}>PCD a cargo</Text>
           {ubicaciones
-            .filter((u) => u.UsuarioID !== user.ID)
+            .filter((u) => u.UsuarioID !== user?.ID)
             .map((ubicacion) => (
               <TouchableOpacity
                 key={ubicacion.ID}

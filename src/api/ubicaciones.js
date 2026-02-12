@@ -1,14 +1,14 @@
 // src/api/ubicaciones.js
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Ubicaciones mock de usuarios (coordenadas en Buenos Aires)
+// Ubicaciones mock de usuarios (coordenadas en Tucumán)
 const UBICACIONES_MOCK = [
   {
     ID: 1,
-    UsuarioID: 1, // Ana Martínez (PCD ID 1)
+    UsuarioID: 4, // Ana Martínez (PCD)
     Nombre: 'Ana Martínez',
-    Latitud: -34.6037,
-    Longitud: -58.3816,
+    Latitud: -26.7554,
+    Longitud: -65.0650,
     Timestamp: new Date().toISOString(),
     Direccion: 'En casa',
     Precision: 10,
@@ -16,10 +16,10 @@ const UBICACIONES_MOCK = [
   },
   {
     ID: 2,
-    UsuarioID: 2, // Laura Fernández (PCD ID 2)
+    UsuarioID: 5, // Laura Fernández (PCD)
     Nombre: 'Laura Fernández',
-    Latitud: -34.6040,
-    Longitud: -58.3820,
+    Latitud: -26.7594,
+    Longitud: -65.0690,
     Timestamp: new Date().toISOString(),
     Direccion: 'Centro de día',
     Precision: 15,

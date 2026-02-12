@@ -21,90 +21,101 @@ import Alertas from '../../Alertas/Alertas';
 
 const Stack = createNativeStackNavigator();
 
-// Pantalla de Dashboard principal
+function SectionHeader({ title, actionLabel, onActionPress }) {
+  return (
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      {actionLabel ? (
+        <TouchableOpacity onPress={onActionPress} activeOpacity={0.8}>
+          <Text style={styles.sectionAction}>{actionLabel}</Text>
+        </TouchableOpacity>
+      ) : null}
+    </View>
+  );
+}
+
+function QuickAction({ icon, label, color, onPress }) {
+  return (
+    <TouchableOpacity style={styles.quickActionCard} onPress={onPress} activeOpacity={0.88}>
+      <View style={[styles.quickActionIcon, { backgroundColor: `${color}1A` }]}>
+        <Ionicons name={icon} size={20} color={color} />
+      </View>
+      <Text style={styles.quickActionLabel}>{label}</Text>
+    </TouchableOpacity>
+  );
+}
+
 function DashboardScreen({ navigation }) {
-  const { user, isPCD, isTutor, isProfesional } = useAuth();
+  const { isPCD, isTutor, isProfesional } = useAuth();
 
-  // Renderizar dashboard según el rol del usuario
-  if (isPCD()) {
-    return <DashboardPCD navigation={navigation} />;
-  }
+  if (isPCD()) return <DashboardPCD navigation={navigation} />;
+  if (isTutor()) return <DashboardTutor navigation={navigation} />;
+  if (isProfesional()) return <DashboardProfesional navigation={navigation} />;
 
-  if (isTutor()) {
-    return <DashboardTutor navigation={navigation} />;
-  }
-
-  if (isProfesional()) {
-    return <DashboardProfesional navigation={navigation} />;
-  }
-
-  // Dashboard por defecto (fallback)
   return <DefaultDashboard navigation={navigation} />;
 }
 
-// Dashboard por defecto (fallback para otros roles)
 function DefaultDashboard({ navigation }) {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(30)).current;
+  const slideAnim = useRef(new Animated.Value(24)).current;
 
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 600,
+        duration: 500,
         useNativeDriver: true,
       }),
       Animated.spring(slideAnim, {
         toValue: 0,
-        tension: 50,
+        tension: 55,
         friction: 8,
         useNativeDriver: true,
       }),
     ]).start();
   }, []);
 
-  const currentDate = new Date();
-  const dateString = currentDate.toLocaleDateString('es-ES', {
+  const dateString = new Date().toLocaleDateString('es-ES', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
   });
 
   const activitiesData = [
     {
       id: 1,
-      title: 'Tomar Ibuprofeno',
-      description: 'Tomar 400mg después del desayuno',
+      title: 'Tomar ibuprofeno',
+      description: 'Tomar 400mg despues del desayuno',
       type: 'medicine',
       status: 'pending',
       startTime: '09:00',
       endTime: '09:30',
       date: 'Hoy',
-      assignedBy: 'Dr. García',
+      assignedBy: 'Dr. Garcia',
     },
     {
       id: 2,
-      title: 'Sesión de Fisioterapia',
-      description: 'Ejercicios de rehabilitación',
+      title: 'Sesion de fisioterapia',
+      description: 'Ejercicios de rehabilitacion',
       type: 'therapy',
       status: 'inProgress',
       startTime: '14:00',
       endTime: '15:00',
       date: 'Hoy',
-      assignedBy: 'Lic. Martínez',
+      assignedBy: 'Lic. Martinez',
     },
     {
       id: 3,
-      title: 'Ejercicios de Estiramiento',
+      title: 'Ejercicios de estiramiento',
       description: 'Rutina matutina de 15 minutos',
       type: 'exercise',
       status: 'completed',
       startTime: '07:00',
       endTime: '07:15',
       date: 'Hoy',
-      assignedBy: 'Tutor Principal',
+      assignedBy: 'Tutor principal',
     },
   ];
 
@@ -113,52 +124,91 @@ function DefaultDashboard({ navigation }) {
       icon: 'checkmark-circle',
       label: 'Completadas',
       value: '12',
-      color: COLORS.success,
-      bgColor: '#E8F5E9',
-      trend: '+2 hoy'
+      helper: '+2 hoy',
+      color: '#0F766E',
+      bg: '#E6F7F5',
     },
     {
       icon: 'time-outline',
       label: 'Pendientes',
       value: '5',
-      color: COLORS.warning,
-      bgColor: '#FFF3E0',
-      trend: '3 urgentes'
+      helper: '3 urgentes',
+      color: '#B45309',
+      bg: '#FFF4DE',
     },
     {
       icon: 'pulse',
-      label: 'En Progreso',
+      label: 'En progreso',
       value: '3',
-      color: COLORS.info,
-      bgColor: '#E3F2FD',
-      trend: '1 activa'
+      helper: '1 activa',
+      color: '#1D4ED8',
+      bg: '#E8F0FF',
+    },
+    {
+      icon: 'warning',
+      label: 'Alertas',
+      value: '1',
+      helper: 'Requiere atencion',
+      color: '#BE123C',
+      bg: '#FFE8EF',
     },
   ];
 
-  // ...existing code...
+  const quickActions = [
+    {
+      key: 'actividades',
+      icon: 'clipboard',
+      label: 'Actividades',
+      color: '#1D4ED8',
+      onPress: () => navigation.navigate('Actividades'),
+    },
+    {
+      key: 'mapa',
+      icon: 'location',
+      label: 'Mapa',
+      color: '#0F766E',
+      onPress: () => navigation.navigate('Mapa'),
+    },
+    {
+      key: 'calendario',
+      icon: 'calendar',
+      label: 'Calendario',
+      color: '#7C3AED',
+      onPress: () => navigation.navigate('Calendario'),
+    },
+    {
+      key: 'reportes',
+      icon: 'stats-chart',
+      label: 'Reportes',
+      color: '#C2410C',
+      onPress: () => navigation.navigate('Reportes'),
+    },
+  ];
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={['#F8FAFE', '#FFFFFF']}
-        style={styles.gradient}
-      />
+      <LinearGradient colors={['#F2F7FF', '#F8FBFF', '#FFFFFF']} style={styles.gradient} />
+      <View style={styles.glowTop} />
 
       <View style={styles.customHeader}>
-        <TouchableOpacity
-          onPress={() => setDrawerVisible(true)}
-          style={styles.menuButton}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="menu" size={28} color={COLORS.primary} />
+        <TouchableOpacity onPress={() => setDrawerVisible(true)} style={styles.menuButton} activeOpacity={0.85}>
+          <Ionicons name="menu" size={24} color={COLORS.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Inicio</Text>
+
+        <View style={styles.headerCenter}>
+          <Text style={styles.headerTitle}>Inicio</Text>
+          <Text style={styles.headerSubtitle}>panel de seguimiento</Text>
+        </View>
+
         <TouchableOpacity
-          onPress={() => Alert.alert('Notificaciones', 'No tienes notificaciones nuevas')}
+          onPress={() => navigation.navigate('Notificaciones')}
           style={styles.notificationButton}
-          activeOpacity={0.7}
+          activeOpacity={0.85}
         >
-          <Ionicons name="notifications-outline" size={24} color={COLORS.text} />
+          <Ionicons name="notifications" size={20} color={COLORS.warning} />
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>1</Text>
+          </View>
         </TouchableOpacity>
       </View>
 
@@ -173,60 +223,60 @@ function DefaultDashboard({ navigation }) {
             transform: [{ translateY: slideAnim }],
           }}
         >
-          <View style={styles.header}>
-            <View style={styles.headerRow}>
-              <View style={styles.headerLeft}>
-                <Text style={styles.greeting}>Hola, bienvenido</Text>
-                <Text style={styles.username}>Usuario Demo</Text>
-                <Text style={styles.dateText}>{dateString}</Text>
+          <LinearGradient colors={['#1146A6', '#1D62D2']} style={styles.heroCard}>
+            <View style={styles.heroRow}>
+              <View style={styles.heroLeft}>
+                <Text style={styles.heroGreeting}>Hola, bienvenido</Text>
+                <Text style={styles.heroName}>Usuario Demo</Text>
+                <Text style={styles.heroDate}>{dateString}</Text>
               </View>
-              <View style={styles.headerRight}>
-                <Avatar name="Usuario Demo" type="user" size="xlarge" showStatus status="online" />
-              </View>
+              <Avatar name="Usuario Demo" type="user" size="large" showStatus status="online" />
             </View>
-          </View>
 
-          <View style={styles.statsContainer}>
-            {stats.map((stat, index) => (
-              <TouchableOpacity key={index} style={styles.statCard} activeOpacity={0.7}>
-                <View style={[styles.statIconContainer, { backgroundColor: stat.bgColor }]}>
-                  <Ionicons name={stat.icon} size={28} color={stat.color} />
+            <TouchableOpacity
+              style={styles.heroPrimaryAction}
+              onPress={() => navigation.navigate('Actividades')}
+              activeOpacity={0.9}
+            >
+              <Ionicons name="flash" size={18} color="#0D3B8E" />
+              <Text style={styles.heroPrimaryActionText}>Ver prioridad de hoy</Text>
+            </TouchableOpacity>
+          </LinearGradient>
+
+          <SectionHeader title="Resumen diario" />
+          <View style={styles.statsGrid}>
+            {stats.map((stat) => (
+              <TouchableOpacity key={stat.label} style={styles.statCard} activeOpacity={0.88}>
+                <View style={[styles.statIcon, { backgroundColor: stat.bg }]}>
+                  <Ionicons name={stat.icon} size={20} color={stat.color} />
                 </View>
-                <View style={styles.statContent}>
-                  <Text style={styles.statValue}>{stat.value}</Text>
-                  <Text style={styles.statLabel}>{stat.label}</Text>
-                  <Text style={[styles.statTrend, { color: stat.color }]}>{stat.trend}</Text>
-                </View>
+                <Text style={styles.statValue}>{stat.value}</Text>
+                <Text style={styles.statLabel}>{stat.label}</Text>
+                <Text style={[styles.statHelper, { color: stat.color }]}>{stat.helper}</Text>
               </TouchableOpacity>
             ))}
           </View>
 
-          {/* Acciones rápidas eliminadas */}
+          <SectionHeader
+            title="Prioridad ahora"
+            actionLabel="Ver todas"
+            onActionPress={() => navigation.navigate('Actividades')}
+          />
+          <View style={styles.activitiesList}>
+            {activitiesData.map((activity) => (
+              <ActivityCard
+                key={activity.id}
+                {...activity}
+                onPress={() => Alert.alert('Actividad', `Ver detalles de: ${activity.title}`)}
+              />
+            ))}
+          </View>
 
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <View style={styles.sectionHeaderLeft}>
-                <Ionicons name="today" size={24} color={COLORS.primary} />
-                <Text style={styles.sectionTitle}>Actividades de Hoy</Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => navigation.navigate('Actividades')}
-                style={styles.seeAllButton}
-              >
-                <Text style={styles.seeAllText}>Ver todas</Text>
-                <Ionicons name="arrow-forward" size={16} color={COLORS.primary} />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.activitiesList}>
-              {activitiesData.map((activity) => (
-                <ActivityCard
-                  key={activity.id}
-                  {...activity}
-                  onPress={() => Alert.alert('Actividad', `Ver detalles de: ${activity.title}`)}
-                />
-              ))}
-            </View>
+          <SectionHeader title="Accesos rapidos" />
+          <View style={styles.quickActionsGrid}>
+            {quickActions.map(({ key, ...rest }) => (
+              <QuickAction key={key} {...rest} />
+            ))}
           </View>
 
           <View style={{ height: SIZES.xl }} />
@@ -249,22 +299,17 @@ function UsuariosScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.customHeader}>
-        <TouchableOpacity
-          onPress={() => setDrawerVisible(true)}
-          style={styles.menuButton}
-        >
-          <Ionicons name="menu" size={28} color={COLORS.primary} />
+        <TouchableOpacity onPress={() => setDrawerVisible(true)} style={styles.menuButton}>
+          <Ionicons name="menu" size={24} color={COLORS.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Usuarios</Text>
-        <View style={{ width: 40 }} />
+        <View style={{ width: 42 }} />
       </View>
 
       <View style={styles.centerContent}>
         <Ionicons name="people" size={64} color={COLORS.primary} />
-        <Text style={styles.title}>Gestión de Usuarios</Text>
-        <Text style={styles.description}>
-          Administra personas con discapacidad, tutores y profesionales
-        </Text>
+        <Text style={styles.title}>Gestion de usuarios</Text>
+        <Text style={styles.description}>Administra personas con discapacidad, tutores y profesionales.</Text>
       </View>
 
       <CustomDrawer
@@ -283,14 +328,11 @@ function ProfesionalesScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.customHeader}>
-        <TouchableOpacity
-          onPress={() => setDrawerVisible(true)}
-          style={styles.menuButton}
-        >
-          <Ionicons name="menu" size={28} color={COLORS.primary} />
+        <TouchableOpacity onPress={() => setDrawerVisible(true)} style={styles.menuButton}>
+          <Ionicons name="menu" size={24} color={COLORS.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Profesionales</Text>
-        <View style={{ width: 40 }} />
+        <View style={{ width: 42 }} />
       </View>
 
       <Profesionales />
@@ -305,162 +347,17 @@ function ProfesionalesScreen({ navigation }) {
   );
 }
 
-function ActividadesScreen({ navigation }) {
-  const [drawerVisible, setDrawerVisible] = useState(false);
-
-  return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.customHeader}>
-        <TouchableOpacity
-          onPress={() => setDrawerVisible(true)}
-          style={styles.menuButton}
-        >
-          <Ionicons name="menu" size={28} color={COLORS.primary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Actividades</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      <View style={styles.centerContent}>
-        <Ionicons name="clipboard" size={64} color={COLORS.secondary} />
-        <Text style={styles.title}>Actividades</Text>
-        <Text style={styles.description}>
-          Gestiona medicamentos, terapias y ejercicios
-        </Text>
-      </View>
-
-      <CustomDrawer
-        visible={drawerVisible}
-        onClose={() => setDrawerVisible(false)}
-        navigation={navigation}
-        currentRoute="Actividades"
-      />
-    </SafeAreaView>
-  );
-}
-
-function CalendarioScreen({ navigation }) {
-  const [drawerVisible, setDrawerVisible] = useState(false);
-
-  return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.customHeader}>
-        <TouchableOpacity
-          onPress={() => setDrawerVisible(true)}
-          style={styles.menuButton}
-        >
-          <Ionicons name="menu" size={28} color={COLORS.primary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Calendario</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      <View style={styles.centerContent}>
-        <Ionicons name="calendar" size={64} color={COLORS.success} />
-        <Text style={styles.title}>Calendario</Text>
-        <Text style={styles.description}>
-          Visualiza actividades completadas y pendientes
-        </Text>
-      </View>
-
-      <CustomDrawer
-        visible={drawerVisible}
-        onClose={() => setDrawerVisible(false)}
-        navigation={navigation}
-        currentRoute="Calendario"
-      />
-    </SafeAreaView>
-  );
-}
-
-function ReportesScreen({ navigation }) {
-  const [drawerVisible, setDrawerVisible] = useState(false);
-
-  return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.customHeader}>
-        <TouchableOpacity
-          onPress={() => setDrawerVisible(true)}
-          style={styles.menuButton}
-        >
-          <Ionicons name="menu" size={28} color={COLORS.primary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Reportes de Progreso</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      <View style={styles.centerContent}>
-        <Ionicons name="document-text" size={64} color={COLORS.accent} />
-        <Text style={styles.title}>Reportes de Progreso</Text>
-        <Text style={styles.description}>
-          Consulta y crea reportes de avance
-        </Text>
-      </View>
-
-      <CustomDrawer
-        visible={drawerVisible}
-        onClose={() => setDrawerVisible(false)}
-        navigation={navigation}
-        currentRoute="Reportes"
-      />
-    </SafeAreaView>
-  );
-}
-
-function NotificacionesScreen({ navigation }) {
-  const [drawerVisible, setDrawerVisible] = useState(false);
-
-  return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.customHeader}>
-        <TouchableOpacity
-          onPress={() => setDrawerVisible(true)}
-          style={styles.menuButton}
-        >
-          <Ionicons name="menu" size={28} color={COLORS.primary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Notificaciones</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      <View style={styles.centerContent}>
-        <Ionicons name="notifications" size={64} color={COLORS.info} />
-        <Text style={styles.title}>Notificaciones</Text>
-        <Text style={styles.description}>
-          Alertas y recordatorios de actividades
-        </Text>
-      </View>
-
-      <CustomDrawer
-        visible={drawerVisible}
-        onClose={() => setDrawerVisible(false)}
-        navigation={navigation}
-        currentRoute="Notificaciones"
-      />
-    </SafeAreaView>
-  );
-}
-
-// Wrapper con CustomDrawer para pantallas que lo necesitan
 function ScreenWithDrawer({ Component, currentRoute, ...props }) {
   const [drawerVisible, setDrawerVisible] = useState(false);
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.customHeader}>
-        <TouchableOpacity
-          onPress={() => setDrawerVisible(true)}
-          style={styles.menuButton}
-        >
-          <Ionicons name="menu" size={28} color={COLORS.primary} />
+        <TouchableOpacity onPress={() => setDrawerVisible(true)} style={styles.menuButton}>
+          <Ionicons name="menu" size={24} color={COLORS.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{currentRoute}</Text>
-        <View style={{ width: 40 }} />
+        <View style={{ width: 42 }} />
       </View>
 
       <Component {...props} />
@@ -475,14 +372,9 @@ function ScreenWithDrawer({ Component, currentRoute, ...props }) {
   );
 }
 
-// Componente principal con Stack Navigator
 export default function Home() {
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Dashboard" component={DashboardScreen} />
       <Stack.Screen name="Usuarios">
         {(props) => <ScreenWithDrawer {...props} Component={Usuarios} currentRoute="Usuarios" />}
@@ -509,4 +401,3 @@ export default function Home() {
     </Stack.Navigator>
   );
 }
-

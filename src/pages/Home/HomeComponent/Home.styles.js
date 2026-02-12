@@ -1,10 +1,10 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform, StatusBar } from 'react-native';
 import { COLORS, SIZES, FONTS } from '../../../constants/theme';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFE',
+    backgroundColor: '#F4F8FF',
   },
   gradient: {
     position: 'absolute',
@@ -13,71 +13,74 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
   },
+  glowTop: {
+    position: 'absolute',
+    top: -120,
+    right: -80,
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    backgroundColor: 'rgba(91, 155, 255, 0.20)',
+  },
 
-  // Custom Header
   customHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: SIZES.lg,
-    paddingTop: SIZES.lg,
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + SIZES.sm : 50,
     paddingBottom: SIZES.md,
-    backgroundColor: 'transparent',
   },
   menuButton: {
-    width: 40,
-    height: 40,
-    borderRadius: SIZES.radiusMedium,
-    backgroundColor: COLORS.primaryLight,
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: '#E6EEFF',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  headerCenter: {
+    flex: 1,
+    alignItems: 'center',
+    marginHorizontal: SIZES.md,
   },
   headerTitle: {
-    ...FONTS.h4,
-    fontWeight: '700',
-    color: COLORS.text,
+    ...FONTS.bodyBold,
+    color: '#16213D',
+    fontSize: 17,
+  },
+  headerSubtitle: {
+    ...FONTS.small,
+    color: '#5F6C86',
+    textTransform: 'capitalize',
   },
   notificationButton: {
-    width: 40,
-    height: 40,
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: '#FFF7E7',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  badge: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 4,
+    backgroundColor: COLORS.warning,
     justifyContent: 'center',
     alignItems: 'center',
   },
-
-  // Header
-  header: {
-    marginBottom: SIZES.xl,
-    paddingTop: SIZES.sm,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerLeft: {
-    flex: 1,
-  },
-  headerRight: {
-    marginLeft: SIZES.md,
-  },
-  greeting: {
-    ...FONTS.caption,
-    color: COLORS.textSecondary,
-    marginBottom: SIZES.xs / 2,
-  },
-  username: {
-    ...FONTS.h2,
+  badgeText: {
+    color: COLORS.white,
+    fontSize: 10,
     fontWeight: '700',
-    color: COLORS.text,
-    marginBottom: SIZES.xs,
-  },
-  dateText: {
-    ...FONTS.small,
-    color: COLORS.textLight,
-    textTransform: 'capitalize',
   },
 
-  // ScrollView
   scrollView: {
     flex: 1,
   },
@@ -86,141 +89,159 @@ const styles = StyleSheet.create({
     paddingBottom: SIZES.xl,
   },
 
-  // Stats Cards
-  statsContainer: {
-    flexDirection: 'row',
-    gap: SIZES.md,
-    marginBottom: SIZES.xl,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: COLORS.white,
-    borderRadius: SIZES.radiusLarge,
+  heroCard: {
+    borderRadius: 24,
     padding: SIZES.lg,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(74, 144, 226, 0.08)',
+    marginBottom: SIZES.lg,
+    shadowColor: '#0D3B8E',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 6,
   },
-  statIconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: SIZES.radiusLarge,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: SIZES.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  statContent: {
-    flex: 1,
-  },
-  statValue: {
-    ...FONTS.h2,
-    fontWeight: '800',
-    marginBottom: SIZES.xs,
-    letterSpacing: -0.5,
-  },
-  statLabel: {
-    ...FONTS.caption,
-    color: COLORS.textSecondary,
-    marginBottom: SIZES.xs,
-    fontWeight: '600',
-  },
-  statTrend: {
-    ...FONTS.small,
-    fontWeight: '700',
-    letterSpacing: 0.2,
-  },
-
-  // Sections
-  section: {
-    marginBottom: SIZES.xl,
-  },
-  sectionHeader: {
+  heroRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: SIZES.md,
   },
-  sectionHeaderLeft: {
+  heroLeft: {
+    flex: 1,
+    marginRight: SIZES.md,
+  },
+  heroGreeting: {
+    ...FONTS.small,
+    color: '#D7E7FF',
+    marginBottom: 2,
+  },
+  heroName: {
+    ...FONTS.h3,
+    color: COLORS.white,
+    marginBottom: SIZES.xs,
+  },
+  heroDate: {
+    ...FONTS.caption,
+    color: '#DDEBFF',
+    textTransform: 'capitalize',
+  },
+  heroPrimaryAction: {
+    backgroundColor: '#E2EEFF',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SIZES.sm,
+    justifyContent: 'center',
+    gap: 6,
   },
-  sectionTitle: {
-    ...FONTS.h4,
+  heroPrimaryActionText: {
+    ...FONTS.caption,
+    color: '#0D3B8E',
     fontWeight: '700',
   },
-  seeAllButton: {
+
+  sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SIZES.xs,
-    paddingVertical: SIZES.xs,
-    paddingHorizontal: SIZES.sm,
-    backgroundColor: COLORS.primaryLight,
-    borderRadius: SIZES.radiusLarge,
+    justifyContent: 'space-between',
+    marginBottom: SIZES.md,
+    marginTop: SIZES.xs,
   },
-  seeAllText: {
+  sectionTitle: {
+    ...FONTS.h5,
+    color: '#1A2752',
+    fontWeight: '700',
+  },
+  sectionAction: {
     ...FONTS.caption,
-    color: COLORS.primary,
+    color: '#1D62D2',
+    fontWeight: '700',
+  },
+
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: SIZES.lg,
+  },
+  statCard: {
+    width: '48%',
+    backgroundColor: COLORS.white,
+    borderRadius: 18,
+    padding: SIZES.md,
+    marginBottom: SIZES.md,
+    borderWidth: 1,
+    borderColor: '#EDF2FB',
+    shadowColor: '#112147',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  statIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: SIZES.sm,
+  },
+  statValue: {
+    ...FONTS.h3,
+    fontSize: 22,
+    color: '#1A2752',
+    marginBottom: 2,
+  },
+  statLabel: {
+    ...FONTS.caption,
+    color: '#606E8B',
+    marginBottom: 2,
+  },
+  statHelper: {
+    ...FONTS.small,
     fontWeight: '600',
   },
 
-  // Quick Actions
+  activitiesList: {
+    gap: SIZES.sm,
+    marginBottom: SIZES.lg,
+  },
+
   quickActionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: SIZES.md,
+    justifyContent: 'space-between',
+    marginTop: SIZES.xs,
   },
-  actionCard: {
-    width: '47%',
+  quickActionCard: {
+    width: '48%',
     backgroundColor: COLORS.white,
-    borderRadius: SIZES.radiusLarge,
-    padding: SIZES.lg,
-    paddingVertical: SIZES.xl,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: 'rgba(74, 144, 226, 0.08)',
-  },
-  actionIconWrapper: {
-    width: 72,
-    height: 72,
-    borderRadius: SIZES.radiusLarge,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
     marginBottom: SIZES.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: '#EDF2FB',
+    shadowColor: '#112147',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
     elevation: 2,
   },
-  actionTitle: {
-    ...FONTS.body,
+  quickActionIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  quickActionLabel: {
+    ...FONTS.caption,
+    color: '#23345E',
     fontWeight: '700',
-    textAlign: 'center',
-    color: COLORS.text,
-    letterSpacing: 0.2,
   },
 
-  // Activities
-  activitiesList: {
-    gap: SIZES.sm,
-  },
-
-  // Center Content (for placeholder screens)
   centerContent: {
     flex: 1,
     justifyContent: 'center',
@@ -231,6 +252,7 @@ const styles = StyleSheet.create({
     ...FONTS.h3,
     marginTop: SIZES.lg,
     marginBottom: SIZES.sm,
+    color: '#1A2752',
   },
   description: {
     ...FONTS.body,

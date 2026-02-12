@@ -153,21 +153,15 @@ export default function Calendario() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient colors={['#F8FAFE', '#FFFFFF']} style={styles.gradient} />
+      <LinearGradient colors={['#F2F7FF', '#F8FBFF', '#FFFFFF']} style={styles.gradient} />
+      <View style={styles.glowTop} />
 
-      {/* Header del mes */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.monthButton}
-          onPress={() => cambiarMes(-1)}
-        >
-          <Ionicons name="chevron-back" size={24} color={COLORS.primary} />
-        </TouchableOpacity>
-
-        <View style={styles.monthInfo}>
-          <Text style={styles.monthText}>
-            {meses[mesActual.getMonth()]} {mesActual.getFullYear()}
-          </Text>
+      <LinearGradient colors={['#1146A6', '#1D62D2']} style={styles.heroCard}>
+        <View style={styles.heroHeader}>
+          <View>
+            <Text style={styles.heroTitle}>Calendario</Text>
+            <Text style={styles.heroSubtitle}>Seguimiento mensual de actividades</Text>
+          </View>
           <TouchableOpacity
             onPress={() => setMesActual(new Date())}
             style={styles.todayButton}
@@ -176,13 +170,28 @@ export default function Calendario() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity
-          style={styles.monthButton}
-          onPress={() => cambiarMes(1)}
-        >
-          <Ionicons name="chevron-forward" size={24} color={COLORS.primary} />
-        </TouchableOpacity>
-      </View>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.monthButton}
+            onPress={() => cambiarMes(-1)}
+          >
+            <Ionicons name="chevron-back" size={24} color="#0D3B8E" />
+          </TouchableOpacity>
+
+          <View style={styles.monthInfo}>
+            <Text style={styles.monthText}>
+              {meses[mesActual.getMonth()]} {mesActual.getFullYear()}
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            style={styles.monthButton}
+            onPress={() => cambiarMes(1)}
+          >
+            <Ionicons name="chevron-forward" size={24} color="#0D3B8E" />
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
 
       {/* Leyenda */}
       <View style={styles.legend}>

@@ -24,7 +24,7 @@ import { obtenerUsuarios } from '../../api/usuarios';
 import FormularioActividad from './FormularioActividad';
 
 export default function Actividades() {
-  const { user, isPCD, isTutor, isProfesional } = useAuth();
+  const { user, isPCD, isTutor, isProfesional, loading: authLoading } = useAuth();
   const [actividades, setActividades] = useState([]);
   const [actividadesFiltradas, setActividadesFiltradas] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
@@ -60,6 +60,13 @@ export default function Actividades() {
     'missed': 'Perdida',
   };
 
+  const resumen = {
+    total: actividades.length,
+    pendientes: actividades.filter((a) => a.Estado === 'pending').length,
+    enProgreso: actividades.filter((a) => a.Estado === 'inProgress').length,
+    completadas: actividades.filter((a) => a.Estado === 'completed').length,
+  };
+
   useEffect(() => {
     cargarDatos();
   }, []);
@@ -69,6 +76,9 @@ export default function Actividades() {
   }, [filtroTipo, filtroEstado, actividades]);
 
   const cargarDatos = async () => {
+    if (authLoading) return;
+    if (isPCD() && !user?.ID) return;
+
     try {
       setLoading(true);
       const [actividadesData, usuariosData] = await Promise.all([
@@ -215,7 +225,7 @@ export default function Actividades() {
     return acciones;
   };
 
-  if (loading && actividades.length === 0) {
+  if (authLoading || (loading && actividades.length === 0)) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={COLORS.primary} />
@@ -226,73 +236,99 @@ export default function Actividades() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient colors={['#F8FAFE', '#FFFFFF']} style={styles.gradient} />
+      <LinearGradient colors={['#F2F7FF', '#F8FBFF', '#FFFFFF']} style={styles.gradient} />
+      <View style={styles.glowTop} />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Actividades</Text>
-        {!isPCD() && (
-          <TouchableOpacity style={styles.addButton} onPress={abrirModalNueva}>
-            <Ionicons name="add" size={24} color={COLORS.white} />
-          </TouchableOpacity>
-        )}
+      <LinearGradient colors={['#1146A6', '#1D62D2']} style={styles.heroCard}>
+        <View style={styles.heroHeader}>
+          <View>
+            <Text style={styles.heroTitle}>Actividades</Text>
+            <Text style={styles.heroSubtitle}>Planificacion y seguimiento diario</Text>
+          </View>
+          {!isPCD() && (
+            <TouchableOpacity style={styles.heroAddButton} onPress={abrirModalNueva}>
+              <Ionicons name="add" size={20} color="#0D3B8E" />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        <View style={styles.heroStats}>
+          <View style={styles.heroStatItem}>
+            <Text style={styles.heroStatValue}>{resumen.total}</Text>
+            <Text style={styles.heroStatLabel}>Total</Text>
+          </View>
+          <View style={styles.heroStatItem}>
+            <Text style={styles.heroStatValue}>{resumen.pendientes}</Text>
+            <Text style={styles.heroStatLabel}>Pendientes</Text>
+          </View>
+          <View style={styles.heroStatItem}>
+            <Text style={styles.heroStatValue}>{resumen.enProgreso}</Text>
+            <Text style={styles.heroStatLabel}>En progreso</Text>
+          </View>
+          <View style={styles.heroStatItem}>
+            <Text style={styles.heroStatValue}>{resumen.completadas}</Text>
+            <Text style={styles.heroStatLabel}>Completadas</Text>
+          </View>
+        </View>
+      </LinearGradient>
+
+      <View style={styles.filtersBlock}>
+        <Text style={styles.filterTitle}>Tipo</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.filtersContainer}
+          contentContainerStyle={styles.filtersContent}
+        >
+          {tipos.map((tipo) => (
+            <TouchableOpacity
+              key={tipo}
+              style={[
+                styles.filterChip,
+                filtroTipo === tipo && styles.filterChipActive,
+              ]}
+              onPress={() => setFiltroTipo(tipo)}
+            >
+              <Text
+                style={[
+                  styles.filterChipText,
+                  filtroTipo === tipo && styles.filterChipTextActive,
+                ]}
+              >
+                {tiposLabels[tipo]}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        <Text style={styles.filterTitle}>Estado</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.filtersContainer}
+          contentContainerStyle={styles.filtersContent}
+        >
+          {estados.map((estado) => (
+            <TouchableOpacity
+              key={estado}
+              style={[
+                styles.filterChip,
+                filtroEstado === estado && styles.filterChipActive,
+              ]}
+              onPress={() => setFiltroEstado(estado)}
+            >
+              <Text
+                style={[
+                  styles.filterChipText,
+                  filtroEstado === estado && styles.filterChipTextActive,
+                ]}
+              >
+                {estadosLabels[estado]}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
-
-      {/* Filtros por tipo */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.filtersContainer}
-        contentContainerStyle={styles.filtersContent}
-      >
-        {tipos.map((tipo) => (
-          <TouchableOpacity
-            key={tipo}
-            style={[
-              styles.filterChip,
-              filtroTipo === tipo && styles.filterChipActive,
-            ]}
-            onPress={() => setFiltroTipo(tipo)}
-          >
-            <Text
-              style={[
-                styles.filterChipText,
-                filtroTipo === tipo && styles.filterChipTextActive,
-              ]}
-            >
-              {tiposLabels[tipo]}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      {/* Filtros por estado */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.filtersContainer}
-        contentContainerStyle={styles.filtersContent}
-      >
-        {estados.map((estado) => (
-          <TouchableOpacity
-            key={estado}
-            style={[
-              styles.filterChip,
-              filtroEstado === estado && styles.filterChipActive,
-            ]}
-            onPress={() => setFiltroEstado(estado)}
-          >
-            <Text
-              style={[
-                styles.filterChipText,
-                filtroEstado === estado && styles.filterChipTextActive,
-              ]}
-            >
-              {estadosLabels[estado]}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
 
       {/* Contador de resultados */}
       <View style={styles.resultsCounter}>

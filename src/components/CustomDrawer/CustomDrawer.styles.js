@@ -1,8 +1,7 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet, Platform, StatusBar } from 'react-native';
 import { COLORS, SIZES, FONTS } from '../../constants/theme';
 
-const { width } = Dimensions.get('window');
-export const DRAWER_WIDTH = 280;
+export const DRAWER_WIDTH = 300;
 
 const styles = StyleSheet.create({
   modalContainer: {
@@ -10,7 +9,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(10, 20, 38, 0.42)',
   },
   overlayTouchable: {
     flex: 1,
@@ -22,56 +21,64 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: DRAWER_WIDTH,
     backgroundColor: COLORS.white,
-    shadowColor: '#000',
-    shadowOffset: { width: 2, height: 0 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 5,
+    shadowColor: '#0B1630',
+    shadowOffset: { width: 4, height: 0 },
+    shadowOpacity: 0.18,
+    shadowRadius: 14,
+    elevation: 10,
+  },
+  drawerTopBg: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    height: 220,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingTop: SIZES.xl,
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + SIZES.sm : 50,
+    paddingBottom: SIZES.lg,
   },
-
-  // Brand Section
   drawerBrand: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: SIZES.lg,
+    gap: SIZES.sm,
     paddingHorizontal: SIZES.lg,
-    marginBottom: SIZES.md,
+    marginBottom: SIZES.lg,
   },
   brandLogoContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: SIZES.radiusMedium,
-    backgroundColor: COLORS.primaryLight,
+    width: 42,
+    height: 42,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: SIZES.sm,
   },
   brandName: {
-    ...FONTS.h4,
-    fontWeight: '700',
-    color: COLORS.primary,
-    marginBottom: SIZES.xs / 2,
+    ...FONTS.bodyBold,
+    color: '#1146A6',
+    fontWeight: '800',
   },
   brandTagline: {
     ...FONTS.small,
-    color: COLORS.textLight,
+    color: '#667089',
   },
-
   userProfileCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFE',
+    backgroundColor: '#FFFFFF',
     marginHorizontal: SIZES.md,
     marginBottom: SIZES.lg,
     padding: SIZES.md,
-    borderRadius: SIZES.radiusMedium,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(74, 144, 226, 0.1)',
+    borderColor: '#E5EDFB',
+    shadowColor: '#112147',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+    elevation: 2,
   },
   userProfileInfo: {
     marginLeft: SIZES.md,
@@ -79,81 +86,106 @@ const styles = StyleSheet.create({
   },
   userProfileName: {
     ...FONTS.bodyBold,
-    color: COLORS.text,
-    marginBottom: SIZES.xs,
+    color: '#1B284A',
+    marginBottom: 4,
   },
   roleBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.white,
-    paddingHorizontal: SIZES.sm,
-    paddingVertical: SIZES.xs / 2,
-    borderRadius: SIZES.radiusSmall,
+    backgroundColor: '#EAF1FF',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
     alignSelf: 'flex-start',
-    gap: SIZES.xs / 2,
+    gap: 4,
   },
   roleText: {
     ...FONTS.small,
-    color: COLORS.info,
-    fontWeight: '600',
+    color: '#1D4ED8',
+    fontWeight: '700',
   },
-
   navLabel: {
     ...FONTS.small,
     fontWeight: '700',
-    color: COLORS.textLight,
+    color: '#8592AD',
     paddingHorizontal: SIZES.lg,
-    paddingTop: SIZES.md,
-    paddingBottom: SIZES.sm,
+    paddingTop: SIZES.sm,
+    paddingBottom: SIZES.xs,
     letterSpacing: 0.5,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: SIZES.md,
+    paddingVertical: 10,
     paddingHorizontal: SIZES.lg,
     marginHorizontal: SIZES.md,
-    marginVertical: SIZES.xs / 2,
-    borderRadius: SIZES.radiusMedium,
-    gap: SIZES.md,
+    marginVertical: 2,
+    borderRadius: 12,
+    gap: SIZES.sm,
   },
   menuItemActive: {
-    backgroundColor: COLORS.primaryLight,
+    backgroundColor: '#EAF1FF',
+  },
+  menuIconWrap: {
+    width: 30,
+    height: 30,
+    borderRadius: 9,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F3F6FC',
+  },
+  menuIconWrapActive: {
+    backgroundColor: '#DDE8FF',
   },
   menuItemText: {
     ...FONTS.body,
+    color: '#4B5877',
     fontWeight: '600',
-    color: COLORS.textSecondary,
+    flex: 1,
   },
   menuItemTextActive: {
-    color: COLORS.primary,
+    color: '#1D4ED8',
+    fontWeight: '700',
   },
-
+  activeDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: '#1D4ED8',
+  },
   logoutItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: SIZES.md,
+    paddingVertical: 10,
     paddingHorizontal: SIZES.lg,
     marginHorizontal: SIZES.md,
-    marginVertical: SIZES.xs / 2,
-    borderRadius: SIZES.radiusMedium,
-    gap: SIZES.md,
+    marginTop: 4,
+    borderRadius: 12,
+    gap: SIZES.sm,
+    backgroundColor: '#FFF1F3',
+  },
+  logoutIconWrap: {
+    width: 30,
+    height: 30,
+    borderRadius: 9,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFE2E8',
   },
   logoutText: {
     ...FONTS.body,
     color: COLORS.error,
-    fontWeight: '600',
+    fontWeight: '700',
   },
-
   drawerFooter: {
-    padding: SIZES.lg,
+    padding: SIZES.md,
     borderTopWidth: 1,
-    borderTopColor: COLORS.divider,
+    borderTopColor: '#E8EEF8',
     alignItems: 'center',
   },
   footerVersion: {
     ...FONTS.small,
-    color: COLORS.textLight,
+    color: '#8A96AF',
   },
 });
 

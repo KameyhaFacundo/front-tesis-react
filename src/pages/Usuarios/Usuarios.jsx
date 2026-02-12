@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Avatar, Button, Input } from '../../components';
-import { COLORS, SIZES, FONTS } from '../../constants/theme';
+import { COLORS, SIZES } from '../../constants/theme';
 import styles from './Usuarios.styles';
 import {
   obtenerUsuarios,
@@ -41,6 +41,19 @@ export default function Usuarios() {
     filtrarUsuarios();
   }, [searchText, filtroRol, usuarios]);
 
+  const stats = useMemo(() => {
+    const pcd = usuarios.filter((u) => u.Rol === 'PCD').length;
+    const tutor = usuarios.filter((u) => u.Rol === 'Tutor').length;
+    const profesional = usuarios.filter((u) => u.Rol === 'Profesional').length;
+
+    return {
+      total: usuarios.length,
+      pcd,
+      tutor,
+      profesional,
+    };
+  }, [usuarios]);
+
   const cargarUsuarios = async () => {
     try {
       setLoading(true);
@@ -56,12 +69,10 @@ export default function Usuarios() {
   const filtrarUsuarios = () => {
     let filtered = [...usuarios];
 
-    // Filtrar por rol
     if (filtroRol !== 'Todos') {
       filtered = filtered.filter((u) => u.Rol === filtroRol);
     }
 
-    // Filtrar por búsqueda
     if (searchText.trim()) {
       const search = searchText.toLowerCase();
       filtered = filtered.filter(
@@ -100,7 +111,6 @@ export default function Usuarios() {
 
   const guardarUsuario = async () => {
     try {
-      // Validaciones básicas
       if (!formData.Nombre || !formData.Apellido || !formData.CorreoElectronico) {
         Alert.alert('Error', 'Nombre, Apellido y Email son requeridos');
         return;
@@ -109,13 +119,11 @@ export default function Usuarios() {
       setLoading(true);
 
       if (usuarioEditar) {
-        // Actualizar
         await actualizarUsuario(usuarioEditar.ID, formData);
-        Alert.alert('Éxito', 'Usuario actualizado correctamente');
+        Alert.alert('Exito', 'Usuario actualizado correctamente');
       } else {
-        // Crear
         await crearUsuario(formData);
-        Alert.alert('Éxito', 'Usuario creado correctamente');
+        Alert.alert('Exito', 'Usuario creado correctamente');
       }
 
       setModalVisible(false);
@@ -129,8 +137,8 @@ export default function Usuarios() {
 
   const confirmarEliminar = (usuario) => {
     Alert.alert(
-      'Confirmar eliminación',
-      `¿Estás seguro de eliminar a ${usuario.Nombre} ${usuario.Apellido}?`,
+      'Confirmar eliminacion',
+      `Estas seguro de eliminar a ${usuario.Nombre} ${usuario.Apellido}?`,
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -146,7 +154,7 @@ export default function Usuarios() {
     try {
       setLoading(true);
       await eliminarUsuario(id);
-      Alert.alert('Éxito', 'Usuario eliminado correctamente');
+      Alert.alert('Exito', 'Usuario eliminado correctamente');
       cargarUsuarios();
     } catch (error) {
       Alert.alert('Error', 'No se pudo eliminar el usuario');
@@ -196,15 +204,46 @@ export default function Usuarios() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient colors={['#F8FAFE', '#FFFFFF']} style={styles.gradient} />
+      <LinearGradient colors={['#F2F7FF', '#F8FBFF', '#FFFFFF']} style={styles.gradient} />
+      <View style={styles.glowTop} />
 
-      {/* Header con búsqueda */}
-      <View style={styles.header}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <LinearGradient colors={['#1146A6', '#1D62D2']} style={styles.heroCard}>
+          <View style={styles.heroHeader}>
+            <View>
+              <Text style={styles.heroTitle}>Usuarios</Text>
+              <Text style={styles.heroSubtitle}>Gestion de personas y roles</Text>
+            </View>
+            <TouchableOpacity style={styles.heroAddButton} onPress={abrirModalNuevo}>
+              <Ionicons name="add" size={20} color="#0D3B8E" />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.heroStats}>
+            <View style={styles.heroStatItem}>
+              <Text style={styles.heroStatValue}>{stats.total}</Text>
+              <Text style={styles.heroStatLabel}>Total</Text>
+            </View>
+            <View style={styles.heroStatItem}>
+              <Text style={styles.heroStatValue}>{stats.pcd}</Text>
+              <Text style={styles.heroStatLabel}>PCD</Text>
+            </View>
+            <View style={styles.heroStatItem}>
+              <Text style={styles.heroStatValue}>{stats.tutor}</Text>
+              <Text style={styles.heroStatLabel}>Tutores</Text>
+            </View>
+            <View style={styles.heroStatItem}>
+              <Text style={styles.heroStatValue}>{stats.profesional}</Text>
+              <Text style={styles.heroStatLabel}>Profesionales</Text>
+            </View>
+          </View>
+        </LinearGradient>
+
         <View style={styles.searchContainer}>
           <Ionicons name="search" size={20} color={COLORS.textSecondary} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Buscar por nombre, email o DNI..."
+            placeholder="Buscar por nombre, email o DNI"
             value={searchText}
             onChangeText={setSearchText}
             placeholderTextColor={COLORS.textLight}
@@ -216,53 +255,29 @@ export default function Usuarios() {
           ) : null}
         </View>
 
-        <TouchableOpacity style={styles.addButton} onPress={abrirModalNuevo}>
-          <Ionicons name="add" size={24} color={COLORS.white} />
-        </TouchableOpacity>
-      </View>
-
-      {/* Filtros por rol */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.filtersContainer}
-        contentContainerStyle={styles.filtersContent}
-      >
-        {roles.map((rol) => (
-          <TouchableOpacity
-            key={rol}
-            style={[
-              styles.filterChip,
-              filtroRol === rol && styles.filterChipActive,
-            ]}
-            onPress={() => setFiltroRol(rol)}
-          >
-            <Text
-              style={[
-                styles.filterChipText,
-                filtroRol === rol && styles.filterChipTextActive,
-              ]}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.filtersContainer}
+          contentContainerStyle={styles.filtersContent}
+        >
+          {roles.map((rol) => (
+            <TouchableOpacity
+              key={rol}
+              style={[styles.filterChip, filtroRol === rol && styles.filterChipActive]}
+              onPress={() => setFiltroRol(rol)}
             >
-              {rol}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+              <Text style={[styles.filterChipText, filtroRol === rol && styles.filterChipTextActive]}>{rol}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
 
-      {/* Contador de resultados */}
-      <View style={styles.resultsCounter}>
-        <Text style={styles.resultsText}>
-          {usuariosFiltrados.length}{' '}
-          {usuariosFiltrados.length === 1 ? 'usuario' : 'usuarios'}
-        </Text>
-      </View>
+        <View style={styles.resultsCounter}>
+          <Text style={styles.resultsText}>
+            {usuariosFiltrados.length} {usuariosFiltrados.length === 1 ? 'usuario' : 'usuarios'}
+          </Text>
+        </View>
 
-      {/* Lista de usuarios */}
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
         {usuariosFiltrados.map((usuario) => (
           <View key={usuario.ID} style={styles.userCard}>
             <View style={styles.userCardHeader}>
@@ -272,14 +287,10 @@ export default function Usuarios() {
                 size="large"
               />
               <View style={styles.userCardInfo}>
-                <Text style={styles.userName}>
-                  {usuario.Nombre} {usuario.Apellido}
-                </Text>
+                <Text style={styles.userName}>{usuario.Nombre} {usuario.Apellido}</Text>
                 <View style={[styles.roleBadge, { backgroundColor: `${getRolColor(usuario.Rol)}20` }]}>
                   <Ionicons name={getRolIcon(usuario.Rol)} size={14} color={getRolColor(usuario.Rol)} />
-                  <Text style={[styles.roleText, { color: getRolColor(usuario.Rol) }]}>
-                    {usuario.Rol}
-                  </Text>
+                  <Text style={[styles.roleText, { color: getRolColor(usuario.Rol) }]}>{usuario.Rol}</Text>
                 </View>
               </View>
             </View>
@@ -310,31 +321,25 @@ export default function Usuarios() {
               {usuario.TipoDiscapacidad && (
                 <View style={styles.detailRow}>
                   <Ionicons name="information-circle" size={16} color={COLORS.user} />
-                  <Text style={styles.detailText}>
-                    {usuario.TipoDiscapacidad} - Grado {usuario.Grado}
-                  </Text>
+                  <Text style={styles.detailText}>{usuario.TipoDiscapacidad} - Grado {usuario.Grado}</Text>
                 </View>
               )}
             </View>
 
             <View style={styles.userCardActions}>
               <TouchableOpacity
-                style={[styles.actionButton, { backgroundColor: COLORS.primaryLight }]}
+                style={[styles.actionButton, { backgroundColor: '#EAF1FF' }]}
                 onPress={() => abrirModalEditar(usuario)}
               >
                 <Ionicons name="create" size={18} color={COLORS.primary} />
-                <Text style={[styles.actionButtonText, { color: COLORS.primary }]}>
-                  Editar
-                </Text>
+                <Text style={[styles.actionButtonText, { color: COLORS.primary }]}>Editar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.actionButton, { backgroundColor: '#FFEBEE' }]}
                 onPress={() => confirmarEliminar(usuario)}
               >
                 <Ionicons name="trash" size={18} color={COLORS.error} />
-                <Text style={[styles.actionButtonText, { color: COLORS.error }]}>
-                  Eliminar
-                </Text>
+                <Text style={[styles.actionButtonText, { color: COLORS.error }]}>Eliminar</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -345,9 +350,7 @@ export default function Usuarios() {
             <Ionicons name="people-outline" size={64} color={COLORS.textLight} />
             <Text style={styles.emptyStateText}>No se encontraron usuarios</Text>
             <Text style={styles.emptyStateSubtext}>
-              {searchText || filtroRol !== 'Todos'
-                ? 'Intenta cambiar los filtros'
-                : 'Agrega un nuevo usuario para comenzar'}
+              {searchText || filtroRol !== 'Todos' ? 'Intenta cambiar los filtros' : 'Agrega un nuevo usuario para comenzar'}
             </Text>
           </View>
         )}
@@ -355,7 +358,6 @@ export default function Usuarios() {
         <View style={{ height: SIZES.xl }} />
       </ScrollView>
 
-      {/* Modal de formulario */}
       <Modal
         visible={modalVisible}
         animationType="slide"
@@ -364,21 +366,25 @@ export default function Usuarios() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
+            <View style={styles.modalHandle} />
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
-                {usuarioEditar ? 'Editar Usuario' : 'Nuevo Usuario'}
-              </Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <View>
+                <Text style={styles.modalTitle}>{usuarioEditar ? 'Editar usuario' : 'Nuevo usuario'}</Text>
+                <Text style={styles.modalSubtitle}>Completá la informacion obligatoria para continuar.</Text>
+              </View>
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalCloseButton}>
                 <Ionicons name="close" size={28} color={COLORS.text} />
               </TouchableOpacity>
             </View>
 
-            <ScrollView
-              style={styles.modalScroll}
-              showsVerticalScrollIndicator={false}
-            >
-              <View style={styles.formSection}>
-                <Text style={styles.sectionTitle}>Información Personal</Text>
+            <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
+              <View style={[styles.formSection, styles.formCard]}>
+                <View style={styles.formSectionHeader}>
+                  <View style={styles.formSectionIcon}>
+                    <Ionicons name="person-outline" size={16} color={COLORS.primary} />
+                  </View>
+                  <Text style={styles.formSectionTitle}>Informacion personal</Text>
+                </View>
 
                 <Input
                   label="Nombre *"
@@ -403,29 +409,32 @@ export default function Usuarios() {
                 />
 
                 <Input
-                  label="Fecha de Nacimiento"
+                  label="Fecha de nacimiento"
                   value={formData.FechaNacimiento}
                   onChangeText={(text) => setFormData({ ...formData, FechaNacimiento: text })}
                   placeholder="YYYY-MM-DD"
                 />
               </View>
 
-              <View style={styles.formSection}>
-                <Text style={styles.sectionTitle}>Contacto</Text>
+              <View style={[styles.formSection, styles.formCard]}>
+                <View style={styles.formSectionHeader}>
+                  <View style={styles.formSectionIcon}>
+                    <Ionicons name="mail-outline" size={16} color={COLORS.primary} />
+                  </View>
+                  <Text style={styles.formSectionTitle}>Contacto</Text>
+                </View>
 
                 <Input
                   label="Email *"
                   value={formData.CorreoElectronico}
-                  onChangeText={(text) =>
-                    setFormData({ ...formData, CorreoElectronico: text })
-                  }
+                  onChangeText={(text) => setFormData({ ...formData, CorreoElectronico: text })}
                   placeholder="usuario@ejemplo.com"
                   keyboardType="email-address"
                   autoCapitalize="none"
                 />
 
                 <Input
-                  label="Teléfono"
+                  label="Telefono"
                   value={formData.Telefono}
                   onChangeText={(text) => setFormData({ ...formData, Telefono: text })}
                   placeholder="1234567890"
@@ -433,15 +442,15 @@ export default function Usuarios() {
                 />
 
                 <Input
-                  label="Dirección"
+                  label="Direccion"
                   value={formData.Direccion}
                   onChangeText={(text) => setFormData({ ...formData, Direccion: text })}
-                  placeholder="Calle, número, ciudad"
+                  placeholder="Calle, numero, ciudad"
                 />
 
                 {!usuarioEditar && (
                   <Input
-                    label="Contraseña"
+                    label="Contrasena"
                     value={formData.Password}
                     onChangeText={(text) => setFormData({ ...formData, Password: text })}
                     placeholder="••••••••"
@@ -450,18 +459,19 @@ export default function Usuarios() {
                 )}
               </View>
 
-              <View style={styles.formSection}>
-                <Text style={styles.sectionTitle}>Rol y Permisos</Text>
-
+              <View style={[styles.formSection, styles.formCard]}>
+                <View style={styles.formSectionHeader}>
+                  <View style={styles.formSectionIcon}>
+                    <Ionicons name="shield-checkmark-outline" size={16} color={COLORS.primary} />
+                  </View>
+                  <Text style={styles.formSectionTitle}>Rol y permisos</Text>
+                </View>
                 <Text style={styles.inputLabel}>Rol *</Text>
                 <View style={styles.rolePicker}>
                   {['PCD', 'Tutor', 'Profesional', 'Administrador'].map((rol) => (
                     <TouchableOpacity
                       key={rol}
-                      style={[
-                        styles.roleOption,
-                        formData.Rol === rol && styles.roleOptionActive,
-                      ]}
+                      style={[styles.roleOption, formData.Rol === rol && styles.roleOptionActive]}
                       onPress={() => setFormData({ ...formData, Rol: rol })}
                     >
                       <Ionicons
@@ -469,26 +479,23 @@ export default function Usuarios() {
                         size={20}
                         color={formData.Rol === rol ? COLORS.white : getRolColor(rol)}
                       />
-                      <Text
-                        style={[
-                          styles.roleOptionText,
-                          formData.Rol === rol && styles.roleOptionTextActive,
-                        ]}
-                      >
-                        {rol}
-                      </Text>
+                      <Text style={[styles.roleOptionText, formData.Rol === rol && styles.roleOptionTextActive]}>{rol}</Text>
                     </TouchableOpacity>
                   ))}
                 </View>
               </View>
 
-              {/* Campos específicos según el rol */}
               {formData.Rol === 'Profesional' && (
-                <View style={styles.formSection}>
-                  <Text style={styles.sectionTitle}>Datos Profesionales</Text>
+                <View style={[styles.formSection, styles.formCard]}>
+                  <View style={styles.formSectionHeader}>
+                    <View style={styles.formSectionIcon}>
+                      <Ionicons name="medkit-outline" size={16} color={COLORS.primary} />
+                    </View>
+                    <Text style={styles.formSectionTitle}>Datos profesionales</Text>
+                  </View>
 
                   <Input
-                    label="Matrícula"
+                    label="Matricula"
                     value={formData.Matricula}
                     onChangeText={(text) => setFormData({ ...formData, Matricula: text })}
                     placeholder="MP-12345"
@@ -504,32 +511,33 @@ export default function Usuarios() {
                   <Input
                     label="Establecimiento"
                     value={formData.Establecimiento}
-                    onChangeText={(text) =>
-                      setFormData({ ...formData, Establecimiento: text })
-                    }
-                    placeholder="Hospital, Clínica, etc."
+                    onChangeText={(text) => setFormData({ ...formData, Establecimiento: text })}
+                    placeholder="Hospital, Clinica, etc."
                   />
 
                   <Input
-                    label="Descripción"
+                    label="Descripcion"
                     value={formData.Descripcion}
                     onChangeText={(text) => setFormData({ ...formData, Descripcion: text })}
-                    placeholder="Breve descripción profesional"
+                    placeholder="Breve descripcion profesional"
                     multiline
                   />
                 </View>
               )}
 
               {formData.Rol === 'PCD' && (
-                <View style={styles.formSection}>
-                  <Text style={styles.sectionTitle}>Datos de Discapacidad</Text>
+                <View style={[styles.formSection, styles.formCard]}>
+                  <View style={styles.formSectionHeader}>
+                    <View style={styles.formSectionIcon}>
+                      <Ionicons name="accessibility-outline" size={16} color={COLORS.primary} />
+                    </View>
+                    <Text style={styles.formSectionTitle}>Datos de discapacidad</Text>
+                  </View>
 
                   <Input
-                    label="Tipo de Discapacidad"
+                    label="Tipo de discapacidad"
                     value={formData.TipoDiscapacidad}
-                    onChangeText={(text) =>
-                      setFormData({ ...formData, TipoDiscapacidad: text })
-                    }
+                    onChangeText={(text) => setFormData({ ...formData, TipoDiscapacidad: text })}
                     placeholder="Motora, Visual, Auditiva, Intelectual, etc."
                   />
 
@@ -541,10 +549,10 @@ export default function Usuarios() {
                   />
 
                   <Input
-                    label="Diagnóstico"
+                    label="Diagnostico"
                     value={formData.Diagnostico}
                     onChangeText={(text) => setFormData({ ...formData, Diagnostico: text })}
-                    placeholder="Descripción del diagnóstico"
+                    placeholder="Descripcion del diagnostico"
                     multiline
                   />
                 </View>
@@ -573,4 +581,3 @@ export default function Usuarios() {
     </View>
   );
 }
-

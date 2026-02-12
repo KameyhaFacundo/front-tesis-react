@@ -35,15 +35,12 @@ export default function Mapa({ route }) {
   const mapRef = useRef(null);
   const watchSubscription = useRef(null);
 
-  // Parámetros de navegación para centrar en un PCD específico
   const { pcdId, pcdNombre } = route?.params || {};
 
   useEffect(() => {
     solicitarPermisos();
-    cargarUbicaciones();
 
     return () => {
-      // Limpiar el tracking al desmontar
       if (watchSubscription.current) {
         watchSubscription.current.remove();
       }
@@ -88,30 +85,31 @@ export default function Mapa({ route }) {
 
       setLocation(newLocation);
 
-      // Guardar ubicación en la API
-      await actualizarUbicacion(
-        user.ID,
-        currentLocation.coords.latitude,
-        currentLocation.coords.longitude
-      );
-
-      // Guardar en historial
-      await guardarEnHistorial(user.ID, {
-        Latitud: currentLocation.coords.latitude,
-        Longitud: currentLocation.coords.longitude,
-        Timestamp: new Date().toISOString(),
-      });
-
-      // Verificar zona segura si es PCD
-      if (isPCD()) {
-        await verificarYResolverAlertas(
+      if (user?.ID) {
+        await actualizarUbicacion(
           user.ID,
           currentLocation.coords.latitude,
           currentLocation.coords.longitude
         );
+
+        await guardarEnHistorial(user.ID, {
+          Latitud: currentLocation.coords.latitude,
+          Longitud: currentLocation.coords.longitude,
+          Timestamp: new Date().toISOString(),
+        });
+
+        if (isPCD()) {
+          await verificarYResolverAlertas(
+            user.ID,
+            currentLocation.coords.latitude,
+            currentLocation.coords.longitude
+          );
+        }
       }
 
-      // Centrar el mapa en la ubicación actual
+      // Cargar ubicaciones de otros usuarios (después de inicializar mocks)
+      await cargarUbicaciones();
+
       if (mapRef.current) {
         mapRef.current.animateToRegion(newLocation, 1000);
       }
@@ -130,7 +128,6 @@ export default function Mapa({ route }) {
       const data = await obtenerUbicaciones();
       setUbicaciones(data);
 
-      // Si viene un pcdId, centrar el mapa en esa ubicación
       if (pcdId && mapRef.current) {
         const pcdUbicacion = data.find((u) => u.UsuarioID === pcdId);
         if (pcdUbicacion) {
@@ -151,14 +148,18 @@ export default function Mapa({ route }) {
   };
 
   const iniciarTracking = async () => {
+    if (!user?.ID) {
+      Alert.alert('Error', 'Sesión no disponible');
+      return;
+    }
     try {
       setTracking(true);
 
       watchSubscription.current = await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.High,
-          timeInterval: 10000, // Actualizar cada 10 segundos
-          distanceInterval: 10, // O cuando se mueva 10 metros
+          timeInterval: 10000,
+          distanceInterval: 10,
         },
         async (newLocation) => {
           const updatedLocation = {
@@ -170,21 +171,18 @@ export default function Mapa({ route }) {
 
           setLocation(updatedLocation);
 
-          // Actualizar en la API
           await actualizarUbicacion(
             user.ID,
             newLocation.coords.latitude,
             newLocation.coords.longitude
           );
 
-          // Guardar en historial
           await guardarEnHistorial(user.ID, {
             Latitud: newLocation.coords.latitude,
             Longitud: newLocation.coords.longitude,
             Timestamp: new Date().toISOString(),
           });
 
-          // Verificar zona segura y crear/resolver alertas automáticamente
           if (isPCD()) {
             const verificacion = await verificarZonaSegura(
               user.ID,
@@ -193,19 +191,15 @@ export default function Mapa({ route }) {
             );
 
             if (!verificacion.dentroDeLaZona) {
-              // Fuera de zona segura - crear alerta
-              console.log('⚠️ Usuario fuera de zona segura!', verificacion.distanciaMetros, 'm');
-              // Asumimos que el tutor tiene ID 3 (esto debería venir de la relación usuario-tutor)
               await crearAlertaZonaSegura(
                 user.ID,
                 `${user.Nombre} ${user.Apellido}`,
                 newLocation.coords.latitude,
                 newLocation.coords.longitude,
                 verificacion.distancia,
-                3 // TutorID - en producción esto vendría de la DB
+                3
               );
             } else {
-              // Dentro de zona segura - resolver alertas si hay
               await verificarYResolverAlertas(
                 user.ID,
                 newLocation.coords.latitude,
@@ -214,7 +208,6 @@ export default function Mapa({ route }) {
             }
           }
 
-          // Recargar ubicaciones de otros usuarios
           cargarUbicaciones();
         }
       );
@@ -243,11 +236,6 @@ export default function Mapa({ route }) {
     if (location && mapRef.current) {
       mapRef.current.animateToRegion(location, 1000);
     }
-  };
-
-  const getMarkerColor = (usuarioID) => {
-    if (usuarioID === user.ID) return COLORS.primary;
-    return COLORS.user;
   };
 
   if (loading) {
@@ -282,14 +270,13 @@ export default function Mapa({ route }) {
           showsCompass={true}
           toolbarEnabled={false}
         >
-          {/* Mi ubicación actual */}
           <Marker
             coordinate={{
               latitude: location.latitude,
               longitude: location.longitude,
             }}
             title="Mi Ubicación"
-            description={`${user.Nombre} ${user.Apellido}`}
+            description={`${user?.Nombre || ''} ${user?.Apellido || ''}`}
             pinColor={COLORS.primary}
           >
             <View style={[styles.markerContainer, { backgroundColor: COLORS.primary }]}>
@@ -297,7 +284,6 @@ export default function Mapa({ route }) {
             </View>
           </Marker>
 
-          {/* Círculo de zona segura (500m de radio) */}
           <Circle
             center={{
               latitude: location.latitude,
@@ -309,10 +295,9 @@ export default function Mapa({ route }) {
             strokeWidth={2}
           />
 
-          {/* Ubicaciones de otros usuarios (PCD) - visible para Tutores/Profesionales */}
           {!isPCD() &&
             ubicaciones
-              .filter((u) => u.UsuarioID !== user.ID)
+              .filter((u) => u.UsuarioID !== user?.ID)
               .map((ubicacion) => {
                 const isSelected = pcdId === ubicacion.UsuarioID;
                 return (
@@ -353,7 +338,6 @@ export default function Mapa({ route }) {
         </View>
       )}
 
-      {/* Panel de información */}
       <View style={styles.infoPanel}>
         <View style={styles.infoPanelHeader}>
           <Ionicons name="location" size={20} color={pcdId ? COLORS.warning : COLORS.primary} />
@@ -411,7 +395,6 @@ export default function Mapa({ route }) {
         </View>
       </View>
 
-      {/* Leyenda */}
       <View style={styles.legend}>
         <View style={styles.legendItem}>
           <View style={[styles.legendMarker, { backgroundColor: COLORS.primary }]} />
@@ -439,4 +422,3 @@ export default function Mapa({ route }) {
     </View>
   );
 }
-

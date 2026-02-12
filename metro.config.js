@@ -1,16 +1,23 @@
 const { getDefaultConfig } = require('expo/metro-config');
+const path = require('path');
 
+/** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(__dirname);
 
+// Block temp directories inside node_modules that cause ENOENT watcher crashes
+config.resolver.blockList = [
+  /node_modules\/.*_tmp_\d+\/.*/,
+];
+
+// Disable Watchman (not available in this environment) and configure
+// the fallback watcher to only watch the project root
 config.watcher = {
-  watchman: {
-    defer: false,
-  },
-  additionalExts: [],
+  ...config.watcher,
+  watchman: { enabled: false },
+  additionalExts: config.watcher?.additionalExts || [],
 };
 
-// Use polling-based file watching to avoid ENOENT errors
-// in sandboxed/containerized environments
-config.watchFolders = [__dirname];
+// Restrict watch folders to only the project directory
+config.watchFolders = [path.resolve(__dirname)];
 
 module.exports = config;

@@ -4,20 +4,30 @@ const path = require('path');
 /** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(__dirname);
 
+const projectRoot = __dirname;
+
+// Force Metro to treat this directory as both the project root and workspace root
+// This prevents Metro from scanning parent directories (v0-next-shadcn) for node_modules
+config.projectRoot = projectRoot;
+
+// Restrict watch folders to ONLY the project directory
+config.watchFolders = [projectRoot];
+
 // Block temp directories inside node_modules that cause ENOENT watcher crashes
 config.resolver.blockList = [
-  /node_modules\/.*_tmp_\d+\/.*/,
+  /.*_tmp_\d+.*/,
+  /.*\.pnpm.*/,
 ];
 
-// Disable Watchman (not available in this environment) and configure
-// the fallback watcher to only watch the project root
+// Point node_modules resolution only to our project's own node_modules
+config.resolver.nodeModulesPaths = [
+  path.resolve(projectRoot, 'node_modules'),
+];
+
+// Disable Watchman (not available in this sandbox environment)
 config.watcher = {
   ...config.watcher,
   watchman: { enabled: false },
-  additionalExts: config.watcher?.additionalExts || [],
 };
-
-// Restrict watch folders to only the project directory
-config.watchFolders = [path.resolve(__dirname)];
 
 module.exports = config;

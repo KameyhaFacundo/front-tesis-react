@@ -27,9 +27,13 @@ export default function Notificaciones() {
 
   useEffect(() => {
     cargarNotificaciones();
-  }, []);
+  }, [user]);
 
   const cargarNotificaciones = async () => {
+    if (!user?.ID) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const data = await obtenerNotificacionesPorUsuario(user.ID);
@@ -60,7 +64,7 @@ export default function Notificaciones() {
   const marcarTodasLeidas = async () => {
     try {
       setLoading(true);
-      await marcarTodasComoLeidas(user.ID);
+      await marcarTodasComoLeidas(user?.ID);
       Alert.alert('Éxito', 'Todas las notificaciones marcadas como leídas');
       cargarNotificaciones();
     } catch (error) {

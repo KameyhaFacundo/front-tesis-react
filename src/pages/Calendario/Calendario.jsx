@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Modal,
+  RefreshControl,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,10 +14,12 @@ import { useAuth } from '../../contexts/AuthContext';
 import { ActivityCard } from '../../components';
 import { COLORS, SIZES } from '../../constants/theme';
 import styles from './Calendario.styles';
+import FormularioActividad from '../Actividades/FormularioActividad';
 import {
   obtenerActividades,
   obtenerActividadesPorUsuario,
 } from '../../api/actividades';
+import { obtenerUsuarios } from '../../api/usuarios';
 
 export default function Calendario() {
   const { user, isPCD } = useAuth();
@@ -25,6 +28,9 @@ export default function Calendario() {
   const [mesActual, setMesActual] = useState(new Date());
   const [diaSeleccionado, setDiaSeleccionado] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalNuevaActividadVisible, setModalNuevaActividadVisible] = useState(false);
+  const [usuarios, setUsuarios] = useState([]);
+  const [actividadPrefill, setActividadPrefill] = useState(null);
 
   const meses = [
     'Enero',
@@ -48,12 +54,20 @@ export default function Calendario() {
   }, []);
 
   const cargarActividades = async () => {
+    if (isPCD() && !user?.ID) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const data = isPCD()
-        ? await obtenerActividadesPorUsuario(user.ID)
+        ? await obtenerActividadesPorUsuario(user?.ID)
         : await obtenerActividades();
       setActividades(data);
+      if (!isPCD()) {
+        const usuariosData = await obtenerUsuarios();
+        setUsuarios(usuariosData);
+      }
     } catch (error) {
       console.error('Error cargando actividades:', error);
     } finally {
@@ -134,10 +148,26 @@ export default function Calendario() {
   const seleccionarDia = (fecha) => {
     if (!fecha) return;
     const acts = getActividadesPorDia(fecha);
-    if (acts.length > 0) {
-      setDiaSeleccionado(fecha);
-      setModalVisible(true);
-    }
+    setDiaSeleccionado(fecha);
+    setModalVisible(true);
+  };
+
+  const formatDateForInput = (fecha) => {
+    const y = fecha.getFullYear();
+    const m = String(fecha.getMonth() + 1).padStart(2, '0');
+    const d = String(fecha.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}T09:00:00`;
+  };
+
+  const abrirCrearActividad = (fecha) => {
+    const baseDate = fecha || new Date();
+    setActividadPrefill({
+      FechaInicio: formatDateForInput(baseDate),
+      FechaFin: formatDateForInput(baseDate),
+      Estado: 'pending',
+      Tipo: 'medicine',
+    });
+    setModalNuevaActividadVisible(true);
   };
 
   const dias = getDiasEnMes(mesActual);
@@ -171,6 +201,17 @@ export default function Calendario() {
         </View>
 
         <View style={styles.header}>
+          {!isPCD() ? (
+            <TouchableOpacity
+              style={styles.todayButton}
+              onPress={() => abrirCrearActividad(new Date())}
+            >
+              <Text style={styles.todayButtonText}>+ Actividad</Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.placeholderAction} />
+          )}
+
           <TouchableOpacity
             style={styles.monthButton}
             onPress={() => cambiarMes(-1)}
@@ -184,10 +225,7 @@ export default function Calendario() {
             </Text>
           </View>
 
-          <TouchableOpacity
-            style={styles.monthButton}
-            onPress={() => cambiarMes(1)}
-          >
+          <TouchableOpacity style={styles.monthButton} onPress={() => cambiarMes(1)}>
             <Ionicons name="chevron-forward" size={24} color="#0D3B8E" />
           </TouchableOpacity>
         </View>
@@ -212,6 +250,7 @@ export default function Calendario() {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={cargarActividades} />}
         showsVerticalScrollIndicator={false}
       >
         {/* Días de la semana */}
@@ -380,13 +419,32 @@ export default function Calendario() {
                     meses[diaSeleccionado.getMonth()]
                   }`}
               </Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close" size={28} color={COLORS.text} />
-              </TouchableOpacity>
+              <View style={styles.modalHeaderActions}>
+                {!isPCD() && diaSeleccionado && (
+                  <TouchableOpacity
+                    style={styles.modalAddButton}
+                    onPress={() => {
+                      setModalVisible(false);
+                      abrirCrearActividad(diaSeleccionado);
+                    }}
+                  >
+                    <Ionicons name="add" size={18} color={COLORS.primary} />
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                  <Ionicons name="close" size={28} color={COLORS.text} />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <ScrollView style={styles.modalScroll}>
-              {diaSeleccionado &&
+              {diaSeleccionado && getActividadesPorDia(diaSeleccionado).length === 0 ? (
+                <View style={styles.emptyDay}>
+                  <Ionicons name="calendar-outline" size={42} color={COLORS.textLight} />
+                  <Text style={styles.emptyDayText}>No hay actividades para este dia</Text>
+                </View>
+              ) : (
+                diaSeleccionado &&
                 getActividadesPorDia(diaSeleccionado).map((actividad) => (
                   <View key={actividad.ID} style={styles.modalActivity}>
                     <ActivityCard
@@ -404,11 +462,31 @@ export default function Calendario() {
                       assignedBy={actividad.AsignadoPor}
                     />
                   </View>
-                ))}
+                ))
+              )}
             </ScrollView>
           </View>
         </View>
       </Modal>
+
+      {!isPCD() && (
+        <Modal
+          visible={modalNuevaActividadVisible}
+          animationType="slide"
+          transparent={false}
+          onRequestClose={() => setModalNuevaActividadVisible(false)}
+        >
+          <FormularioActividad
+            actividad={actividadPrefill}
+            usuarios={usuarios}
+            onClose={() => setModalNuevaActividadVisible(false)}
+            onSuccess={() => {
+              setModalNuevaActividadVisible(false);
+              cargarActividades();
+            }}
+          />
+        </Modal>
+      )}
     </View>
   );
 }

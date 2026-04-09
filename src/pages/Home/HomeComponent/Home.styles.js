@@ -1,4 +1,4 @@
-import { StyleSheet, Platform, StatusBar } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { COLORS, SIZES, FONTS } from '../../../constants/theme';
 
 const styles = StyleSheet.create({
@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: SIZES.lg,
-    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + SIZES.sm : 50,
+    paddingTop: SIZES.sm,
     paddingBottom: SIZES.md,
   },
   menuButton: {

@@ -5,13 +5,13 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-  ActivityIndicator,
   Modal,
+  RefreshControl,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
-import { ActivityCard, Button } from '../../components';
+import { ActivityCard, Button, EmptyState, SkeletonCard } from '../../components';
 import { COLORS, SIZES } from '../../constants/theme';
 import styles from './Actividades.styles';
 import {
@@ -82,7 +82,7 @@ export default function Actividades() {
     try {
       setLoading(true);
       const [actividadesData, usuariosData] = await Promise.all([
-        isPCD() ? obtenerActividadesPorUsuario(user.ID) : obtenerActividades(),
+        isPCD() ? obtenerActividadesPorUsuario(user?.ID) : obtenerActividades(),
         obtenerUsuarios(),
       ]);
       setActividades(actividadesData);
@@ -228,8 +228,9 @@ export default function Actividades() {
   if (authLoading || (loading && actividades.length === 0)) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.loadingText}>Cargando actividades...</Text>
+        <SkeletonCard />
+        <SkeletonCard />
+        <SkeletonCard />
       </View>
     );
   }
@@ -342,6 +343,7 @@ export default function Actividades() {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={cargarDatos} />}
         showsVerticalScrollIndicator={false}
       >
         {actividadesFiltradas.map((actividad) => (
@@ -418,17 +420,19 @@ export default function Actividades() {
         ))}
 
         {actividadesFiltradas.length === 0 && (
-          <View style={styles.emptyState}>
-            <Ionicons name="clipboard-outline" size={64} color={COLORS.textLight} />
-            <Text style={styles.emptyStateText}>No hay actividades</Text>
-            <Text style={styles.emptyStateSubtext}>
-              {filtroTipo !== 'Todas' || filtroEstado !== 'Todas'
-                ? 'Intenta cambiar los filtros'
+          <EmptyState
+            icon="clipboard-outline"
+            title="No hay actividades"
+            description={
+              filtroTipo !== 'Todas' || filtroEstado !== 'Todas'
+                ? 'Intenta cambiar los filtros.'
                 : !isPCD()
-                ? 'Agrega una nueva actividad para comenzar'
-                : 'No tienes actividades asignadas'}
-            </Text>
-          </View>
+                ? 'Agrega una nueva actividad para comenzar.'
+                : 'No tienes actividades asignadas.'
+            }
+            actionText={!isPCD() ? 'Nueva actividad' : undefined}
+            onAction={!isPCD() ? abrirModalNueva : undefined}
+          />
         )}
 
         <View style={{ height: SIZES.xl }} />

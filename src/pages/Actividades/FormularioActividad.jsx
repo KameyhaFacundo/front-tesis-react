@@ -13,9 +13,11 @@ import { COLORS, SIZES, FONTS } from '../../constants/theme';
 import styles from './FormularioActividad.styles';
 import { crearActividad, actualizarActividad } from '../../api/actividades';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 
 export default function FormularioActividad({ actividad, usuarios, onClose, onSuccess }) {
   const { user, loading: authLoading } = useAuth();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [tipoSeleccionado, setTipoSeleccionado] = useState(
     actividad?.Tipo || 'medicine'
@@ -99,10 +101,10 @@ export default function FormularioActividad({ actividad, usuarios, onClose, onSu
 
       if (actividad) {
         await actualizarActividad(actividad.ID, datosActividad);
-        Alert.alert('Éxito', 'Actividad actualizada correctamente');
+        showToast('Actividad actualizada correctamente', 'success');
       } else {
         await crearActividad(datosActividad);
-        Alert.alert('Éxito', 'Actividad creada correctamente');
+        showToast('Actividad creada correctamente', 'success');
       }
 
       onSuccess();

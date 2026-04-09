@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
+import { EmptyState, SkeletonCard } from '../../components';
 import { COLORS, SIZES, FONTS } from '../../constants/theme';
 import styles from './Alertas.styles';
 import {
@@ -28,9 +29,13 @@ export default function Alertas({ navigation }) {
   }, []);
 
   const cargarAlertas = async () => {
+    if (!user?.ID) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
-      const data = await obtenerAlertasPorTutor(user.ID);
+      const data = await obtenerAlertasPorTutor(user?.ID);
       setAlertas(data);
     } catch (error) {
       console.error('Error cargando alertas:', error);
@@ -226,16 +231,25 @@ export default function Alertas({ navigation }) {
           <RefreshControl refreshing={loading} onRefresh={cargarAlertas} />
         }
       >
+        {loading && alertasFiltradas.length === 0 && (
+          <>
+            <SkeletonCard />
+            <SkeletonCard />
+          </>
+        )}
         {alertasFiltradas.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Ionicons name="shield-checkmark" size={64} color={COLORS.success} />
-            <Text style={styles.emptyText}>No hay alertas</Text>
-            <Text style={styles.emptySubtext}>
-              {filtroEstado === 'activa'
-                ? 'Todas las PCD están en zona segura'
-                : 'No hay alertas en esta categoría'}
-            </Text>
-          </View>
+          !loading && (
+            <EmptyState
+              icon="shield-checkmark-outline"
+              title="No hay alertas"
+              description={
+                filtroEstado === 'activa'
+                  ? 'Todas las PCD estan en zona segura.'
+                  : 'No hay alertas en esta categoria.'
+              }
+              iconColor={COLORS.success}
+            />
+          )
         ) : (
           alertasFiltradas.map((alerta) => {
             const icono = getIconoEstado(alerta.Estado);

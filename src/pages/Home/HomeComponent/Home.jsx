@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, Alert, Animated } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert, Animated } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,6 +19,7 @@ import Notificaciones from '../../Notificaciones/Notificaciones';
 import Reportes from '../../Reportes/Reportes';
 import Mapa from '../../Mapa/Mapa';
 import Alertas from '../../Alertas/Alertas';
+import Perfil from '../../Perfil/Perfil';
 
 const Stack = createNativeStackNavigator();
 
@@ -47,16 +49,30 @@ function QuickAction({ icon, label, color, onPress }) {
 
 function DashboardScreen({ navigation }) {
   const { isPCD, isTutor, isProfesional } = useAuth();
+  const [drawerVisible, setDrawerVisible] = useState(false);
+  const onOpenDrawer = () => setDrawerVisible(true);
 
-  if (isPCD()) return <DashboardPCD navigation={navigation} />;
-  if (isTutor()) return <DashboardTutor navigation={navigation} />;
-  if (isProfesional()) return <DashboardProfesional navigation={navigation} />;
+  const renderDashboard = () => {
+    if (isPCD()) return <DashboardPCD navigation={navigation} onOpenDrawer={onOpenDrawer} />;
+    if (isTutor()) return <DashboardTutor navigation={navigation} onOpenDrawer={onOpenDrawer} />;
+    if (isProfesional()) return <DashboardProfesional navigation={navigation} onOpenDrawer={onOpenDrawer} />;
+    return <DefaultDashboard navigation={navigation} onOpenDrawer={onOpenDrawer} />;
+  };
 
-  return <DefaultDashboard navigation={navigation} />;
+  return (
+    <>
+      {renderDashboard()}
+      <CustomDrawer
+        visible={drawerVisible}
+        onClose={() => setDrawerVisible(false)}
+        navigation={navigation}
+        currentRoute="Dashboard"
+      />
+    </>
+  );
 }
 
-function DefaultDashboard({ navigation }) {
-  const [drawerVisible, setDrawerVisible] = useState(false);
+function DefaultDashboard({ navigation, onOpenDrawer }) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(24)).current;
 
@@ -186,12 +202,12 @@ function DefaultDashboard({ navigation }) {
   ];
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <LinearGradient colors={['#F2F7FF', '#F8FBFF', '#FFFFFF']} style={styles.gradient} />
       <View style={styles.glowTop} />
 
       <View style={styles.customHeader}>
-        <TouchableOpacity onPress={() => setDrawerVisible(true)} style={styles.menuButton} activeOpacity={0.85}>
+        <TouchableOpacity onPress={onOpenDrawer} style={styles.menuButton} activeOpacity={0.85}>
           <Ionicons name="menu" size={24} color={COLORS.primary} />
         </TouchableOpacity>
 
@@ -282,67 +298,6 @@ function DefaultDashboard({ navigation }) {
           <View style={{ height: SIZES.xl }} />
         </Animated.View>
       </ScrollView>
-
-      <CustomDrawer
-        visible={drawerVisible}
-        onClose={() => setDrawerVisible(false)}
-        navigation={navigation}
-        currentRoute="Dashboard"
-      />
-    </View>
-  );
-}
-
-function UsuariosScreen({ navigation }) {
-  const [drawerVisible, setDrawerVisible] = useState(false);
-
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.customHeader}>
-        <TouchableOpacity onPress={() => setDrawerVisible(true)} style={styles.menuButton}>
-          <Ionicons name="menu" size={24} color={COLORS.primary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Usuarios</Text>
-        <View style={{ width: 42 }} />
-      </View>
-
-      <View style={styles.centerContent}>
-        <Ionicons name="people" size={64} color={COLORS.primary} />
-        <Text style={styles.title}>Gestion de usuarios</Text>
-        <Text style={styles.description}>Administra personas con discapacidad, tutores y profesionales.</Text>
-      </View>
-
-      <CustomDrawer
-        visible={drawerVisible}
-        onClose={() => setDrawerVisible(false)}
-        navigation={navigation}
-        currentRoute="Usuarios"
-      />
-    </SafeAreaView>
-  );
-}
-
-function ProfesionalesScreen({ navigation }) {
-  const [drawerVisible, setDrawerVisible] = useState(false);
-
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.customHeader}>
-        <TouchableOpacity onPress={() => setDrawerVisible(true)} style={styles.menuButton}>
-          <Ionicons name="menu" size={24} color={COLORS.primary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Profesionales</Text>
-        <View style={{ width: 42 }} />
-      </View>
-
-      <Profesionales />
-
-      <CustomDrawer
-        visible={drawerVisible}
-        onClose={() => setDrawerVisible(false)}
-        navigation={navigation}
-        currentRoute="Profesionales"
-      />
     </SafeAreaView>
   );
 }
@@ -351,13 +306,25 @@ function ScreenWithDrawer({ Component, currentRoute, ...props }) {
   const [drawerVisible, setDrawerVisible] = useState(false);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.customHeader}>
-        <TouchableOpacity onPress={() => setDrawerVisible(true)} style={styles.menuButton}>
+        <TouchableOpacity
+          onPress={() => props.navigation.goBack()}
+          style={styles.menuButton}
+          activeOpacity={0.85}
+        >
+          <Ionicons name="arrow-back" size={22} color={COLORS.primary} />
+        </TouchableOpacity>
+
+        <Text style={styles.headerTitle}>{currentRoute}</Text>
+
+        <TouchableOpacity
+          onPress={() => setDrawerVisible(true)}
+          style={styles.menuButton}
+          activeOpacity={0.85}
+        >
           <Ionicons name="menu" size={24} color={COLORS.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{currentRoute}</Text>
-        <View style={{ width: 42 }} />
       </View>
 
       <Component {...props} />
@@ -379,7 +346,9 @@ export default function Home() {
       <Stack.Screen name="Usuarios">
         {(props) => <ScreenWithDrawer {...props} Component={Usuarios} currentRoute="Usuarios" />}
       </Stack.Screen>
-      <Stack.Screen name="Profesionales" component={ProfesionalesScreen} />
+      <Stack.Screen name="Profesionales">
+        {(props) => <ScreenWithDrawer {...props} Component={Profesionales} currentRoute="Profesionales" />}
+      </Stack.Screen>
       <Stack.Screen name="Actividades">
         {(props) => <ScreenWithDrawer {...props} Component={Actividades} currentRoute="Actividades" />}
       </Stack.Screen>
@@ -397,6 +366,9 @@ export default function Home() {
       </Stack.Screen>
       <Stack.Screen name="Alertas">
         {(props) => <ScreenWithDrawer {...props} Component={Alertas} currentRoute="Alertas" />}
+      </Stack.Screen>
+      <Stack.Screen name="Perfil">
+        {(props) => <ScreenWithDrawer {...props} Component={Perfil} currentRoute="Perfil" />}
       </Stack.Screen>
     </Stack.Navigator>
   );

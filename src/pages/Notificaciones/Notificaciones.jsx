@@ -5,11 +5,12 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
+import { EmptyState, SkeletonCard } from '../../components';
 import { COLORS, SIZES } from '../../constants/theme';
 import styles from './Notificaciones.styles';
 import {
@@ -138,8 +139,9 @@ export default function Notificaciones() {
   if (loading && notificaciones.length === 0) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.loadingText}>Cargando notificaciones...</Text>
+        <SkeletonCard />
+        <SkeletonCard />
+        <SkeletonCard />
       </View>
     );
   }
@@ -222,6 +224,7 @@ export default function Notificaciones() {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={cargarNotificaciones} />}
         showsVerticalScrollIndicator={false}
       >
         {notificacionesFiltradas.map((notif) => (
@@ -317,17 +320,17 @@ export default function Notificaciones() {
         ))}
 
         {notificacionesFiltradas.length === 0 && (
-          <View style={styles.emptyState}>
-            <Ionicons name="notifications-outline" size={64} color={COLORS.textLight} />
-            <Text style={styles.emptyStateText}>No hay notificaciones</Text>
-            <Text style={styles.emptyStateSubtext}>
-              {filtro === 'no_leidas'
-                ? 'No tienes notificaciones sin leer'
+          <EmptyState
+            icon="notifications-outline"
+            title="No hay notificaciones"
+            description={
+              filtro === 'no_leidas'
+                ? 'No tienes notificaciones sin leer.'
                 : filtro === 'leidas'
-                ? 'No tienes notificaciones leídas'
-                : 'Cuando recibas notificaciones aparecerán aquí'}
-            </Text>
-          </View>
+                ? 'No tienes notificaciones leidas.'
+                : 'Cuando recibas notificaciones apareceran aqui.'
+            }
+          />
         )}
 
         <View style={{ height: SIZES.xl }} />

@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, Animated } from 'react-native';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Alert, Animated, RefreshControl } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../contexts/AuthContext';
-import { Avatar, ActivityCard, CustomDrawer } from '../../../components';
+import { Avatar, ActivityCard } from '../../../components';
 import { COLORS, SIZES } from '../../../constants/theme';
 import { obtenerAlertasActivasPorTutor } from '../../../api/alertas';
 import styles from './DashboardTutor.styles';
@@ -21,10 +21,9 @@ function SectionHeader({ title, actionLabel, onActionPress }) {
   );
 }
 
-export default function DashboardTutor({ navigation }) {
+export default function DashboardTutor({ navigation, onOpenDrawer }) {
   const { user } = useAuth();
-  const [drawerVisible, setDrawerVisible] = useState(false);
-  const [alertasActivas, setAlertasActivas] = useState([]);
+  const [alertasActivas, setAlertasActivas] = React.useState([]);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(24)).current;
 
@@ -47,8 +46,9 @@ export default function DashboardTutor({ navigation }) {
   }, []);
 
   const cargarAlertas = async () => {
+    if (!user?.ID) return;
     try {
-      const alertas = await obtenerAlertasActivasPorTutor(user.ID);
+      const alertas = await obtenerAlertasActivasPorTutor(user?.ID);
       setAlertasActivas(alertas);
     } catch (error) {
       console.error('Error cargando alertas:', error);
@@ -173,7 +173,7 @@ export default function DashboardTutor({ navigation }) {
       <View style={styles.glowTop} />
 
       <View style={styles.customHeader}>
-        <TouchableOpacity onPress={() => setDrawerVisible(true)} style={styles.menuButton} activeOpacity={0.85}>
+        <TouchableOpacity onPress={onOpenDrawer} style={styles.menuButton} activeOpacity={0.85}>
           <Ionicons name="menu" size={24} color={COLORS.primary} />
         </TouchableOpacity>
 
@@ -204,6 +204,7 @@ export default function DashboardTutor({ navigation }) {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={false} onRefresh={cargarAlertas} />}
       >
         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
           <LinearGradient colors={['#1146A6', '#1D62D2']} style={styles.heroCard}>
@@ -364,12 +365,6 @@ export default function DashboardTutor({ navigation }) {
         </Animated.View>
       </ScrollView>
 
-      <CustomDrawer
-        visible={drawerVisible}
-        onClose={() => setDrawerVisible(false)}
-        navigation={navigation}
-        currentRoute="Dashboard"
-      />
     </View>
   );
 }

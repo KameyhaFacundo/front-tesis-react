@@ -73,6 +73,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  placeholderAction: {
+    width: 84,
+  },
   monthInfo: {
     alignItems: 'center',
   },
@@ -256,6 +259,19 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
+  modalHeaderActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SIZES.sm,
+  },
+  modalAddButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 9,
+    backgroundColor: '#EAF1FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   modalTitle: {
     ...FONTS.h3,
     fontWeight: '700',
@@ -266,6 +282,16 @@ const styles = StyleSheet.create({
   },
   modalActivity: {
     marginBottom: SIZES.md,
+  },
+  emptyDay: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SIZES.xl,
+  },
+  emptyDayText: {
+    ...FONTS.caption,
+    color: COLORS.textSecondary,
+    marginTop: SIZES.sm,
   },
 });
 

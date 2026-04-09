@@ -1,15 +1,14 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../contexts/AuthContext';
-import { Avatar, ActivityCard, CustomDrawer } from '../../../components';
+import { Avatar, ActivityCard } from '../../../components';
 import { COLORS, SIZES } from '../../../constants/theme';
 import styles from './DashboardProfesional.styles';
 
-export default function DashboardProfesional({ navigation }) {
+export default function DashboardProfesional({ navigation, onOpenDrawer }) {
   const { user } = useAuth();
-  const [drawerVisible, setDrawerVisible] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(24)).current;
 
@@ -174,7 +173,7 @@ export default function DashboardProfesional({ navigation }) {
 
       <View style={styles.customHeader}>
         <TouchableOpacity
-          onPress={() => setDrawerVisible(true)}
+          onPress={onOpenDrawer}
           style={styles.menuButton}
           activeOpacity={0.85}
         >
@@ -364,12 +363,6 @@ export default function DashboardProfesional({ navigation }) {
         </Animated.View>
       </ScrollView>
 
-      <CustomDrawer
-        visible={drawerVisible}
-        onClose={() => setDrawerVisible(false)}
-        navigation={navigation}
-        currentRoute="Dashboard"
-      />
     </View>
   );
 }

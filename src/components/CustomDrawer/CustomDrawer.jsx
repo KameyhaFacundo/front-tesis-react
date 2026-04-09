@@ -59,6 +59,8 @@ const CustomDrawer = ({ visible, onClose, navigation, currentRoute }) => {
     { id: 'mapa', title: 'Ubicacion GPS', icon: 'location', route: 'Mapa' },
     { id: 'reportes', title: 'Reportes', icon: 'document-text', route: 'Reportes' },
     { id: 'notificaciones', title: 'Notificaciones', icon: 'notifications', route: 'Notificaciones' },
+    { id: 'alertas', title: 'Alertas', icon: 'alert-circle', route: 'Alertas' },
+    { id: 'perfil', title: 'Perfil', icon: 'person-circle', route: 'Perfil' },
   ];
 
   const handleNavigate = (route) => {

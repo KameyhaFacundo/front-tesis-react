@@ -5,13 +5,13 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-  ActivityIndicator,
   Modal,
+  RefreshControl,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
-import { Button } from '../../components';
+import { Button, EmptyState, SkeletonCard } from '../../components';
 import { COLORS, SIZES } from '../../constants/theme';
 import styles from './Reportes.styles';
 import {
@@ -34,10 +34,14 @@ export default function Reportes() {
   }, []);
 
   const cargarReportes = async () => {
+    if (isPCD() && !user?.ID) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const data = isPCD()
-        ? await obtenerReportesPorUsuario(user.ID)
+        ? await obtenerReportesPorUsuario(user?.ID)
         : await obtenerReportes();
       setReportes(data.sort((a, b) =>
         new Date(b.FechaCreacion) - new Date(a.FechaCreacion)
@@ -133,8 +137,9 @@ export default function Reportes() {
   if (loading && reportes.length === 0) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.loadingText}>Cargando reportes...</Text>
+        <SkeletonCard />
+        <SkeletonCard />
+        <SkeletonCard />
       </View>
     );
   }
@@ -152,6 +157,7 @@ export default function Reportes() {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={cargarReportes} />}
         showsVerticalScrollIndicator={false}
       >
         {reportes.map((reporte) => (
@@ -218,15 +224,15 @@ export default function Reportes() {
         ))}
 
         {reportes.length === 0 && (
-          <View style={styles.emptyState}>
-            <Ionicons name="document-text-outline" size={64} color={COLORS.textLight} />
-            <Text style={styles.emptyStateText}>No hay reportes</Text>
-            <Text style={styles.emptyStateSubtext}>
-              {isPCD()
-                ? 'Cuando tu equipo médico cree reportes aparecerán aquí'
-                : 'Crea reportes para hacer seguimiento del progreso'}
-            </Text>
-          </View>
+          <EmptyState
+            icon="document-text-outline"
+            title="No hay reportes"
+            description={
+              isPCD()
+                ? 'Cuando tu equipo medico cree reportes apareceran aqui.'
+                : 'Crea reportes para hacer seguimiento del progreso.'
+            }
+          />
         )}
 
         <View style={{ height: SIZES.xl }} />

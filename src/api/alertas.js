@@ -11,8 +11,8 @@ const ALERTAS_MOCK = [
     Tipo: 'zona_segura',
     Severidad: 'critica',
     Mensaje: 'Ana Martínez ha salido de la zona segura',
-    Latitud: -34.6080,
-    Longitud: -58.3900,
+    Latitud: -26.7600,
+    Longitud: -65.0700,
     DistanciaKm: 0.52,
     Timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // Hace 2 horas
     Estado: 'activa', // activa, resuelta, falsa_alarma
@@ -26,14 +26,14 @@ let alertasActuales = [...ALERTAS_MOCK];
 // Configuración de zonas seguras por usuario
 const ZONAS_SEGURAS = {
   4: { // Ana Martínez
-    latitud: -34.6037,
-    longitud: -58.3816,
+    latitud: -26.7554,
+    longitud: -65.0650,
     radio: 500, // metros
     nombre: 'Casa de Ana'
   },
   5: { // Laura Fernández
-    latitud: -34.6040,
-    longitud: -58.3820,
+    latitud: -26.7594,
+    longitud: -65.0690,
     radio: 500,
     nombre: 'Centro de día'
   },

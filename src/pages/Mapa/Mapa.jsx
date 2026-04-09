@@ -192,8 +192,8 @@ export default function Mapa({ route }) {
 
             if (!verificacion.dentroDeLaZona) {
               await crearAlertaZonaSegura(
-                user.ID,
-                `${user.Nombre} ${user.Apellido}`,
+                user?.ID,
+                `${user?.Nombre || ''} ${user?.Apellido || ''}`,
                 newLocation.coords.latitude,
                 newLocation.coords.longitude,
                 verificacion.distancia,

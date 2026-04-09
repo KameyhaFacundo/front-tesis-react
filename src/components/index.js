@@ -8,3 +8,5 @@ export { default as ActivityCard } from './ActivityCard/ActivityCard';
 export { default as Toast } from './Toast/Toast';
 export { default as EmptyState } from './EmptyState/EmptyState';
 export { default as CustomDrawer } from './CustomDrawer/CustomDrawer';
+export { default as Skeleton, SkeletonCard } from './Skeleton/Skeleton';
+export { default as ErrorBoundary } from './ErrorBoundary/ErrorBoundary';

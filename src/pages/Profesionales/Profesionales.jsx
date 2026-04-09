@@ -13,7 +13,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SIZES } from '../../constants/theme';
 import styles from './Profesionales.styles';
-import { Avatar, Button } from '../../components';
+import { Avatar, Button, EmptyState, SkeletonCard } from '../../components';
+import { useToast } from '../../contexts/ToastContext';
 import {
   obtenerProfesionales,
   crearProfesional,
@@ -23,6 +24,7 @@ import {
 } from '../../api/profesionales';
 
 export default function Profesionales() {
+  const { showToast } = useToast();
   const [profesionales, setProfesionales] = useState([]);
   const [profesionalesFiltrados, setProfesionalesFiltrados] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -161,10 +163,10 @@ export default function Profesionales() {
     try {
       if (modoEdicion) {
         await actualizarProfesional(profesionalSeleccionado.ID, formData);
-        Alert.alert('Exito', 'Profesional actualizado correctamente');
+        showToast('Profesional actualizado correctamente', 'success');
       } else {
         await crearProfesional(formData);
-        Alert.alert('Exito', 'Profesional creado correctamente');
+        showToast('Profesional creado correctamente', 'success');
       }
       setModalVisible(false);
       cargarProfesionales();
@@ -187,7 +189,7 @@ export default function Profesionales() {
           onPress: async () => {
             try {
               await eliminarProfesional(profesional.ID);
-              Alert.alert('Exito', 'Profesional eliminado correctamente');
+              showToast('Profesional eliminado correctamente', 'success');
               cargarProfesionales();
               cargarEspecialidades();
             } catch (error) {
@@ -295,11 +297,20 @@ export default function Profesionales() {
           </Text>
         </View>
 
-        {profesionalesFiltrados.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Ionicons name="briefcase-outline" size={64} color={COLORS.textLight} />
-            <Text style={styles.emptyText}>No se encontraron profesionales</Text>
-          </View>
+        {loading && profesionales.length === 0 ? (
+          <>
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </>
+        ) : profesionalesFiltrados.length === 0 ? (
+          <EmptyState
+            icon="briefcase-outline"
+            title="No se encontraron profesionales"
+            description="No hay profesionales para los filtros seleccionados."
+            actionText="Nuevo profesional"
+            onAction={abrirModalNuevo}
+          />
         ) : (
           profesionalesFiltrados.map((profesional) => (
             <View key={profesional.ID} style={styles.card}>

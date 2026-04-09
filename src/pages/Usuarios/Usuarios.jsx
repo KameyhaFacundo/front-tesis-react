@@ -7,13 +7,13 @@ import {
   Alert,
   Modal,
   TextInput,
-  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Avatar, Button, Input } from '../../components';
+import { Avatar, Button, Input, EmptyState, SkeletonCard } from '../../components';
 import { COLORS, SIZES } from '../../constants/theme';
 import styles from './Usuarios.styles';
+import { useToast } from '../../contexts/ToastContext';
 import {
   obtenerUsuarios,
   crearUsuario,
@@ -22,6 +22,7 @@ import {
 } from '../../api/usuarios';
 
 export default function Usuarios() {
+  const { showToast } = useToast();
   const [usuarios, setUsuarios] = useState([]);
   const [usuariosFiltrados, setUsuariosFiltrados] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -120,10 +121,10 @@ export default function Usuarios() {
 
       if (usuarioEditar) {
         await actualizarUsuario(usuarioEditar.ID, formData);
-        Alert.alert('Exito', 'Usuario actualizado correctamente');
+        showToast('Usuario actualizado correctamente', 'success');
       } else {
         await crearUsuario(formData);
-        Alert.alert('Exito', 'Usuario creado correctamente');
+        showToast('Usuario creado correctamente', 'success');
       }
 
       setModalVisible(false);
@@ -154,7 +155,7 @@ export default function Usuarios() {
     try {
       setLoading(true);
       await eliminarUsuario(id);
-      Alert.alert('Exito', 'Usuario eliminado correctamente');
+      showToast('Usuario eliminado correctamente', 'success');
       cargarUsuarios();
     } catch (error) {
       Alert.alert('Error', 'No se pudo eliminar el usuario');
@@ -196,8 +197,9 @@ export default function Usuarios() {
   if (loading && usuarios.length === 0) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.loadingText}>Cargando usuarios...</Text>
+        <SkeletonCard />
+        <SkeletonCard />
+        <SkeletonCard />
       </View>
     );
   }
@@ -346,13 +348,17 @@ export default function Usuarios() {
         ))}
 
         {usuariosFiltrados.length === 0 && (
-          <View style={styles.emptyState}>
-            <Ionicons name="people-outline" size={64} color={COLORS.textLight} />
-            <Text style={styles.emptyStateText}>No se encontraron usuarios</Text>
-            <Text style={styles.emptyStateSubtext}>
-              {searchText || filtroRol !== 'Todos' ? 'Intenta cambiar los filtros' : 'Agrega un nuevo usuario para comenzar'}
-            </Text>
-          </View>
+          <EmptyState
+            icon="people-outline"
+            title="No se encontraron usuarios"
+            description={
+              searchText || filtroRol !== 'Todos'
+                ? 'Intenta cambiar los filtros.'
+                : 'Agrega un nuevo usuario para comenzar.'
+            }
+            actionText="Nuevo usuario"
+            onAction={abrirModalNuevo}
+          />
         )}
 
         <View style={{ height: SIZES.xl }} />

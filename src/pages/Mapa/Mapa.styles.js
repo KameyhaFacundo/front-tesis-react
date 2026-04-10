@@ -6,6 +6,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8FAFE',
   },
+  map: {
+    flex: 1,
+  },
+
+  // ── Loading / Error ───────────────────────────────────────────────────────
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -34,9 +39,6 @@ const styles = StyleSheet.create({
   retryButton: {
     minWidth: 200,
   },
-  map: {
-    flex: 1,
-  },
   noLocationContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -47,10 +49,23 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     marginTop: SIZES.md,
   },
-  markerContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+
+  // ── Marcador propio ───────────────────────────────────────────────────────
+  myMarkerWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pulseRing: {
+    position: 'absolute',
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: `${COLORS.primary}25`,
+  },
+  markerCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
@@ -61,117 +76,241 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  infoPanel: {
-    position: 'absolute',
-    top: SIZES.md,
-    left: SIZES.md,
-    right: SIZES.md,
-    backgroundColor: COLORS.white,
-    borderRadius: SIZES.radiusLarge,
-    padding: SIZES.lg,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+
+  // ── Marcadores de usuarios ────────────────────────────────────────────────
+  userMarkerWrapper: {
+    alignItems: 'center',
   },
-  infoPanelHeader: {
+  userMarkerCircle: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderColor: COLORS.white,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 6,
+  },
+  userMarkerInitials: {
+    color: COLORS.white,
+    fontWeight: '700',
+  },
+  markerPointer: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 6,
+    borderRightWidth: 6,
+    borderTopWidth: 8,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    marginTop: -1,
+  },
+
+  // ── Tracking chip (top) ───────────────────────────────────────────────────
+  trackingChip: {
+    position: 'absolute',
+    top: 16,
+    alignSelf: 'center',
+    backgroundColor: COLORS.success,
+    borderRadius: 999,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SIZES.sm,
-    marginBottom: SIZES.md,
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    shadowColor: COLORS.success,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+    elevation: 6,
   },
-  infoPanelTitle: {
-    ...FONTS.bodyBold,
+  trackingDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: COLORS.white,
+  },
+  trackingChipText: {
+    color: COLORS.white,
+    fontWeight: '600',
+    fontSize: 13,
+  },
+
+  // ── FABs ──────────────────────────────────────────────────────────────────
+  fabColumn: {
+    position: 'absolute',
+    right: 16,
+    alignItems: 'center',
+    gap: 10,
+  },
+  fabSmall: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: COLORS.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  fabLarge: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+
+  // ── Bottom Sheet ──────────────────────────────────────────────────────────
+  bottomSheet: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 12,
+    overflow: 'hidden',
+  },
+  sheetHandle: {
+    alignItems: 'center',
+    paddingTop: 10,
+    paddingBottom: 6,
+  },
+  handleBar: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#DDE3EE',
+  },
+  sheetContent: {
+    paddingHorizontal: 20,
+    paddingTop: 4,
+  },
+
+  // Usuario seleccionado
+  sheetUserRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  sheetAvatar: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: COLORS.user,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sheetAvatarText: {
+    color: COLORS.white,
+    fontWeight: '700',
+    fontSize: 20,
+  },
+  sheetUserInfo: {
+    flex: 1,
+  },
+  sheetUserName: {
+    fontSize: 17,
+    fontWeight: '700',
     color: COLORS.text,
   },
-  coordsContainer: {
+  sheetDistanceRow: {
     flexDirection: 'row',
-    gap: SIZES.lg,
-    marginBottom: SIZES.md,
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 2,
   },
-  coordsText: {
-    ...FONTS.small,
+  sheetDistanceText: {
+    fontSize: 13,
     color: COLORS.textSecondary,
+  },
+  sheetCloseBtn: {
+    padding: 4,
+  },
+  sheetCoordsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 16,
+  },
+  sheetCoordCard: {
+    flex: 1,
+    backgroundColor: '#F3F6FB',
+    borderRadius: 12,
+    padding: 12,
+  },
+  sheetCoordLabel: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  sheetCoordValue: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.text,
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
-  buttonRow: {
-    flexDirection: 'row',
-    gap: SIZES.sm,
-  },
-  iconButton: {
-    width: 48,
-    height: 48,
-    borderRadius: SIZES.radiusMedium,
+  sheetCenterBtn: {
+    marginTop: 12,
     backgroundColor: COLORS.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  trackingButton: {
-    flex: 1,
+    borderRadius: 12,
+    paddingVertical: 13,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: SIZES.xs,
-    height: 48,
-    borderRadius: SIZES.radiusMedium,
-    backgroundColor: COLORS.success,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    gap: 8,
   },
-  trackingButtonActive: {
-    backgroundColor: COLORS.error,
-  },
-  trackingButtonText: {
-    ...FONTS.bodyBold,
+  sheetCenterBtnText: {
     color: COLORS.white,
+    fontWeight: '600',
+    fontSize: 15,
   },
-  legend: {
-    position: 'absolute',
-    bottom: SIZES.md,
-    left: SIZES.md,
-    right: SIZES.md,
-    backgroundColor: COLORS.white,
-    borderRadius: SIZES.radiusMedium,
-    padding: SIZES.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  legendItem: {
+
+  // Panel colapsado
+  sheetCollapsedRow: {
+    paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SIZES.sm,
-    marginBottom: SIZES.xs,
+    gap: 12,
   },
-  legendMarker: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: COLORS.white,
+  sheetCollapsedIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  legendCircle: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: COLORS.primary,
-    backgroundColor: 'rgba(74, 144, 226, 0.1)',
+  sheetCollapsedTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.text,
   },
-  legendText: {
-    ...FONTS.small,
+  sheetCollapsedCoords: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    marginTop: 1,
+  },
+  sheetCollapsedCount: {
+    marginLeft: 'auto',
+    fontSize: 12,
     color: COLORS.textSecondary,
   },
 });
+
 export default styles;

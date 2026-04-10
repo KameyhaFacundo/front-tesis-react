@@ -6,6 +6,7 @@ import {
   Alert,
   ActivityIndicator,
   Platform,
+  Animated,
 } from 'react-native';
 import MapView, { Marker, Circle, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
@@ -25,6 +26,29 @@ import {
   verificarYResolverAlertas,
 } from '../../api/alertas';
 
+const PANEL_COLLAPSED = 80;
+const PANEL_EXPANDED = 270;
+
+function getInitials(nombre) {
+  if (!nombre) return '?';
+  const parts = nombre.trim().split(' ');
+  return parts.slice(0, 2).map((p) => p[0]).join('').toUpperCase();
+}
+
+function calcDistance(lat1, lon1, lat2, lon2) {
+  if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+  const R = 6371000;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
+  const d = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return d < 1000 ? `${Math.round(d)} m` : `${(d / 1000).toFixed(1)} km`;
+}
+
 export default function Mapa({ route }) {
   const { user, isPCD } = useAuth();
   const [location, setLocation] = useState(null);
@@ -32,35 +56,79 @@ export default function Mapa({ route }) {
   const [loading, setLoading] = useState(true);
   const [tracking, setTracking] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
+
   const mapRef = useRef(null);
   const watchSubscription = useRef(null);
+  const panelAnim = useRef(new Animated.Value(PANEL_COLLAPSED)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const pulseLoop = useRef(null);
 
   const { pcdId, pcdNombre } = route?.params || {};
 
   useEffect(() => {
     solicitarPermisos();
-
     return () => {
-      if (watchSubscription.current) {
-        watchSubscription.current.remove();
-      }
+      if (watchSubscription.current) watchSubscription.current.remove();
+      if (pulseLoop.current) pulseLoop.current.stop();
     };
   }, []);
+
+  useEffect(() => {
+    if (tracking) {
+      pulseLoop.current = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, { toValue: 1.5, duration: 900, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 1, duration: 900, useNativeDriver: true }),
+        ])
+      );
+      pulseLoop.current.start();
+    } else {
+      if (pulseLoop.current) pulseLoop.current.stop();
+      pulseAnim.setValue(1);
+    }
+  }, [tracking]);
+
+  const expandPanel = (ubicacion) => {
+    setSelectedUser(ubicacion);
+    Animated.spring(panelAnim, {
+      toValue: PANEL_EXPANDED,
+      useNativeDriver: false,
+      tension: 65,
+      friction: 11,
+    }).start();
+    if (mapRef.current) {
+      mapRef.current.animateToRegion(
+        {
+          latitude: ubicacion.Latitud,
+          longitude: ubicacion.Longitud,
+          latitudeDelta: 0.008,
+          longitudeDelta: 0.008,
+        },
+        600
+      );
+    }
+  };
+
+  const collapsePanel = () => {
+    setSelectedUser(null);
+    Animated.spring(panelAnim, {
+      toValue: PANEL_COLLAPSED,
+      useNativeDriver: false,
+      tension: 65,
+      friction: 11,
+    }).start();
+  };
 
   const solicitarPermisos = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-
       if (status !== 'granted') {
         setErrorMsg('Permiso de ubicación denegado');
-        Alert.alert(
-          'Permiso Necesario',
-          'Esta app necesita acceso a la ubicación para funcionar correctamente.'
-        );
+        Alert.alert('Permiso Necesario', 'Esta app necesita acceso a la ubicación para funcionar correctamente.');
         setLoading(false);
         return;
       }
-
       obtenerUbicacionActual();
     } catch (error) {
       console.error('Error solicitando permisos:', error);
@@ -75,45 +143,26 @@ export default function Mapa({ route }) {
       const currentLocation = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
       });
-
       const newLocation = {
         latitude: currentLocation.coords.latitude,
         longitude: currentLocation.coords.longitude,
         latitudeDelta: 0.01,
         longitudeDelta: 0.01,
       };
-
       setLocation(newLocation);
-
       if (user?.ID) {
-        await actualizarUbicacion(
-          user.ID,
-          currentLocation.coords.latitude,
-          currentLocation.coords.longitude
-        );
-
+        await actualizarUbicacion(user.ID, currentLocation.coords.latitude, currentLocation.coords.longitude);
         await guardarEnHistorial(user.ID, {
           Latitud: currentLocation.coords.latitude,
           Longitud: currentLocation.coords.longitude,
           Timestamp: new Date().toISOString(),
         });
-
         if (isPCD()) {
-          await verificarYResolverAlertas(
-            user.ID,
-            currentLocation.coords.latitude,
-            currentLocation.coords.longitude
-          );
+          await verificarYResolverAlertas(user.ID, currentLocation.coords.latitude, currentLocation.coords.longitude);
         }
       }
-
-      // Cargar ubicaciones de otros usuarios (después de inicializar mocks)
       await cargarUbicaciones();
-
-      if (mapRef.current) {
-        mapRef.current.animateToRegion(newLocation, 1000);
-      }
-
+      if (mapRef.current) mapRef.current.animateToRegion(newLocation, 1000);
       setLoading(false);
     } catch (error) {
       console.error('Error obteniendo ubicación:', error);
@@ -127,18 +176,19 @@ export default function Mapa({ route }) {
     try {
       const data = await obtenerUbicaciones();
       setUbicaciones(data);
-
       if (pcdId && mapRef.current) {
         const pcdUbicacion = data.find((u) => u.UsuarioID === pcdId);
         if (pcdUbicacion) {
-          const region = {
-            latitude: pcdUbicacion.Latitud,
-            longitude: pcdUbicacion.Longitud,
-            latitudeDelta: 0.01,
-            longitudeDelta: 0.01,
-          };
           setTimeout(() => {
-            mapRef.current?.animateToRegion(region, 1000);
+            mapRef.current?.animateToRegion(
+              {
+                latitude: pcdUbicacion.Latitud,
+                longitude: pcdUbicacion.Longitud,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              },
+              1000
+            );
           }, 500);
         }
       }
@@ -148,19 +198,11 @@ export default function Mapa({ route }) {
   };
 
   const iniciarTracking = async () => {
-    if (!user?.ID) {
-      Alert.alert('Error', 'Sesión no disponible');
-      return;
-    }
+    if (!user?.ID) { Alert.alert('Error', 'Sesión no disponible'); return; }
     try {
       setTracking(true);
-
       watchSubscription.current = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.High,
-          timeInterval: 10000,
-          distanceInterval: 10,
-        },
+        { accuracy: Location.Accuracy.High, timeInterval: 10000, distanceInterval: 10 },
         async (newLocation) => {
           const updatedLocation = {
             latitude: newLocation.coords.latitude,
@@ -168,28 +210,15 @@ export default function Mapa({ route }) {
             latitudeDelta: 0.01,
             longitudeDelta: 0.01,
           };
-
           setLocation(updatedLocation);
-
-          await actualizarUbicacion(
-            user.ID,
-            newLocation.coords.latitude,
-            newLocation.coords.longitude
-          );
-
+          await actualizarUbicacion(user.ID, newLocation.coords.latitude, newLocation.coords.longitude);
           await guardarEnHistorial(user.ID, {
             Latitud: newLocation.coords.latitude,
             Longitud: newLocation.coords.longitude,
             Timestamp: new Date().toISOString(),
           });
-
           if (isPCD()) {
-            const verificacion = await verificarZonaSegura(
-              user.ID,
-              newLocation.coords.latitude,
-              newLocation.coords.longitude
-            );
-
+            const verificacion = await verificarZonaSegura(user.ID, newLocation.coords.latitude, newLocation.coords.longitude);
             if (!verificacion.dentroDeLaZona) {
               await crearAlertaZonaSegura(
                 user?.ID,
@@ -200,21 +229,11 @@ export default function Mapa({ route }) {
                 3
               );
             } else {
-              await verificarYResolverAlertas(
-                user.ID,
-                newLocation.coords.latitude,
-                newLocation.coords.longitude
-              );
+              await verificarYResolverAlertas(user.ID, newLocation.coords.latitude, newLocation.coords.longitude);
             }
           }
-
           cargarUbicaciones();
         }
-      );
-
-      Alert.alert(
-        'Tracking Activado',
-        'Tu ubicación se actualizará automáticamente cada 10 segundos'
       );
     } catch (error) {
       console.error('Error iniciando tracking:', error);
@@ -229,13 +248,10 @@ export default function Mapa({ route }) {
       watchSubscription.current = null;
     }
     setTracking(false);
-    Alert.alert('Tracking Detenido', 'El seguimiento de ubicación se ha detenido');
   };
 
   const centrarEnMiUbicacion = () => {
-    if (location && mapRef.current) {
-      mapRef.current.animateToRegion(location, 1000);
-    }
+    if (location && mapRef.current) mapRef.current.animateToRegion(location, 800);
   };
 
   if (loading) {
@@ -257,74 +273,91 @@ export default function Mapa({ route }) {
     );
   }
 
+  const distance =
+    selectedUser && location
+      ? calcDistance(location.latitude, location.longitude, selectedUser.Latitud, selectedUser.Longitud)
+      : null;
+
+  const fabBottom = PANEL_COLLAPSED + 20;
+
   return (
     <View style={styles.container}>
+      {/* Mapa */}
       {location ? (
         <MapView
           ref={mapRef}
           style={styles.map}
           provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
           initialRegion={location}
-          showsUserLocation={true}
+          showsUserLocation={false}
           showsMyLocationButton={false}
           showsCompass={true}
           toolbarEnabled={false}
+          onPress={collapsePanel}
         >
+          {/* Marcador propio con pulso */}
           <Marker
-            coordinate={{
-              latitude: location.latitude,
-              longitude: location.longitude,
-            }}
+            coordinate={{ latitude: location.latitude, longitude: location.longitude }}
             title="Mi Ubicación"
             description={`${user?.Nombre || ''} ${user?.Apellido || ''}`}
-            pinColor={COLORS.primary}
           >
-            <View style={[styles.markerContainer, { backgroundColor: COLORS.primary }]}>
-              <Ionicons name="person" size={20} color={COLORS.white} />
+            <View style={styles.myMarkerWrapper}>
+              {tracking && (
+                <Animated.View
+                  style={[styles.pulseRing, { transform: [{ scale: pulseAnim }] }]}
+                />
+              )}
+              <View style={[styles.markerCircle, { backgroundColor: tracking ? COLORS.success : COLORS.primary }]}>
+                <Ionicons name="person" size={22} color={COLORS.white} />
+              </View>
             </View>
           </Marker>
 
+          {/* Zona segura */}
           <Circle
-            center={{
-              latitude: location.latitude,
-              longitude: location.longitude,
-            }}
+            center={{ latitude: location.latitude, longitude: location.longitude }}
             radius={500}
-            fillColor="rgba(74, 144, 226, 0.1)"
-            strokeColor="rgba(74, 144, 226, 0.5)"
+            fillColor="rgba(74, 144, 226, 0.08)"
+            strokeColor="rgba(74, 144, 226, 0.35)"
             strokeWidth={2}
           />
 
+          {/* Marcadores de otros usuarios */}
           {!isPCD() &&
             ubicaciones
               .filter((u) => u.UsuarioID !== user?.ID)
               .map((ubicacion) => {
-                const isSelected = pcdId === ubicacion.UsuarioID;
+                const isSelected =
+                  selectedUser?.UsuarioID === ubicacion.UsuarioID ||
+                  pcdId === ubicacion.UsuarioID;
                 return (
                   <Marker
                     key={ubicacion.ID}
-                    coordinate={{
-                      latitude: ubicacion.Latitud,
-                      longitude: ubicacion.Longitud,
-                    }}
-                    title={ubicacion.Nombre || `Usuario ${ubicacion.UsuarioID}`}
-                    description={ubicacion.Direccion}
+                    coordinate={{ latitude: ubicacion.Latitud, longitude: ubicacion.Longitud }}
+                    onPress={() => expandPanel(ubicacion)}
                   >
-                    <View
-                      style={[
-                        styles.markerContainer,
-                        {
-                          backgroundColor: isSelected ? COLORS.warning : COLORS.user,
-                          width: isSelected ? 50 : 40,
-                          height: isSelected ? 50 : 40,
-                          borderRadius: isSelected ? 25 : 20,
-                        },
-                      ]}
-                    >
-                      <Ionicons
-                        name={isSelected ? "person" : "person-outline"}
-                        size={isSelected ? 28 : 20}
-                        color={COLORS.white}
+                    <View style={styles.userMarkerWrapper}>
+                      <View
+                        style={[
+                          styles.userMarkerCircle,
+                          {
+                            backgroundColor: isSelected ? COLORS.warning : COLORS.user,
+                            width: isSelected ? 52 : 42,
+                            height: isSelected ? 52 : 42,
+                            borderRadius: isSelected ? 26 : 21,
+                            borderWidth: isSelected ? 3 : 2,
+                          },
+                        ]}
+                      >
+                        <Text style={[styles.userMarkerInitials, { fontSize: isSelected ? 16 : 13 }]}>
+                          {getInitials(ubicacion.Nombre)}
+                        </Text>
+                      </View>
+                      <View
+                        style={[
+                          styles.markerPointer,
+                          { borderTopColor: isSelected ? COLORS.warning : COLORS.user },
+                        ]}
                       />
                     </View>
                   </Marker>
@@ -338,87 +371,130 @@ export default function Mapa({ route }) {
         </View>
       )}
 
-      <View style={styles.infoPanel}>
-        <View style={styles.infoPanelHeader}>
-          <Ionicons name="location" size={20} color={pcdId ? COLORS.warning : COLORS.primary} />
-          <Text style={styles.infoPanelTitle}>
-            {pcdId && pcdNombre
-              ? `Ubicación: ${pcdNombre}`
-              : tracking
-              ? 'Tracking Activo'
-              : 'Mi Ubicación'}
-          </Text>
+      {/* Chip de tracking activo (top center) */}
+      {tracking && (
+        <View style={styles.trackingChip}>
+          <Animated.View style={[styles.trackingDot, { transform: [{ scale: pulseAnim }] }]} />
+          <Text style={styles.trackingChipText}>Tracking activo</Text>
+        </View>
+      )}
+
+      {/* FABs flotantes (derecha) */}
+      <View style={[styles.fabColumn, { bottom: fabBottom }]}>
+        <TouchableOpacity style={styles.fabSmall} onPress={centrarEnMiUbicacion} activeOpacity={0.85}>
+          <Ionicons name="navigate" size={20} color={COLORS.primary} />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.fabSmall} onPress={obtenerUbicacionActual} activeOpacity={0.85}>
+          <Ionicons name="refresh" size={20} color={COLORS.primary} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.fabLarge, { backgroundColor: tracking ? COLORS.error : COLORS.primary }]}
+          onPress={tracking ? detenerTracking : iniciarTracking}
+          activeOpacity={0.85}
+        >
+          <Ionicons name={tracking ? 'stop' : 'radio'} size={26} color={COLORS.white} />
+        </TouchableOpacity>
+      </View>
+
+      {/* Bottom Sheet */}
+      <Animated.View style={[styles.bottomSheet, { height: panelAnim }]}>
+        {/* Handle */}
+        <View style={styles.sheetHandle}>
+          <View style={styles.handleBar} />
         </View>
 
-        {location && (
-          <View style={styles.coordsContainer}>
-            <Text style={styles.coordsText}>
-              Lat: {location.latitude.toFixed(6)}
-            </Text>
-            <Text style={styles.coordsText}>
-              Lon: {location.longitude.toFixed(6)}
-            </Text>
+        {selectedUser ? (
+          <View style={styles.sheetContent}>
+            {/* Header del usuario */}
+            <View style={styles.sheetUserRow}>
+              <View style={styles.sheetAvatar}>
+                <Text style={styles.sheetAvatarText}>{getInitials(selectedUser.Nombre)}</Text>
+              </View>
+              <View style={styles.sheetUserInfo}>
+                <Text style={styles.sheetUserName}>
+                  {selectedUser.Nombre || `Usuario ${selectedUser.UsuarioID}`}
+                </Text>
+                {distance && (
+                  <View style={styles.sheetDistanceRow}>
+                    <Ionicons name="walk" size={13} color={COLORS.textSecondary} />
+                    <Text style={styles.sheetDistanceText}>{distance} de distancia</Text>
+                  </View>
+                )}
+              </View>
+              <TouchableOpacity onPress={collapsePanel} style={styles.sheetCloseBtn}>
+                <Ionicons name="close-circle" size={26} color={COLORS.textLight} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Coords */}
+            <View style={styles.sheetCoordsRow}>
+              <View style={styles.sheetCoordCard}>
+                <Text style={styles.sheetCoordLabel}>LATITUD</Text>
+                <Text style={styles.sheetCoordValue}>{selectedUser.Latitud?.toFixed(6)}</Text>
+              </View>
+              <View style={styles.sheetCoordCard}>
+                <Text style={styles.sheetCoordLabel}>LONGITUD</Text>
+                <Text style={styles.sheetCoordValue}>{selectedUser.Longitud?.toFixed(6)}</Text>
+              </View>
+            </View>
+
+            {/* Acción */}
+            <TouchableOpacity
+              style={styles.sheetCenterBtn}
+              onPress={() => {
+                if (mapRef.current) {
+                  mapRef.current.animateToRegion(
+                    {
+                      latitude: selectedUser.Latitud,
+                      longitude: selectedUser.Longitud,
+                      latitudeDelta: 0.004,
+                      longitudeDelta: 0.004,
+                    },
+                    600
+                  );
+                }
+              }}
+              activeOpacity={0.88}
+            >
+              <Ionicons name="navigate" size={18} color={COLORS.white} />
+              <Text style={styles.sheetCenterBtnText}>Centrar en este usuario</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          /* Panel colapsado: info básica propia */
+          <View style={styles.sheetCollapsedRow}>
+            <View
+              style={[
+                styles.sheetCollapsedIcon,
+                { backgroundColor: tracking ? `${COLORS.success}20` : `${COLORS.primary}15` },
+              ]}
+            >
+              <Ionicons
+                name="location"
+                size={18}
+                color={tracking ? COLORS.success : COLORS.primary}
+              />
+            </View>
+            <View>
+              <Text style={styles.sheetCollapsedTitle}>
+                {tracking ? 'Tracking activo' : 'Mi ubicación'}
+              </Text>
+              {location && (
+                <Text style={styles.sheetCollapsedCoords}>
+                  {location.latitude.toFixed(5)}, {location.longitude.toFixed(5)}
+                </Text>
+              )}
+            </View>
+            {!isPCD() && (
+              <Text style={styles.sheetCollapsedCount}>
+                {ubicaciones.filter((u) => u.UsuarioID !== user?.ID).length} PCD
+              </Text>
+            )}
           </View>
         )}
-
-        <View style={styles.buttonRow}>
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={centrarEnMiUbicacion}
-          >
-            <Ionicons name="navigate" size={24} color={COLORS.white} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={obtenerUbicacionActual}
-          >
-            <Ionicons name="refresh" size={24} color={COLORS.white} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.trackingButton,
-              tracking && styles.trackingButtonActive,
-            ]}
-            onPress={tracking ? detenerTracking : iniciarTracking}
-          >
-            <Ionicons
-              name={tracking ? 'pause' : 'play'}
-              size={20}
-              color={COLORS.white}
-            />
-            <Text style={styles.trackingButtonText}>
-              {tracking ? 'Detener' : 'Tracking'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View style={styles.legend}>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendMarker, { backgroundColor: COLORS.primary }]} />
-          <Text style={styles.legendText}>Mi ubicación</Text>
-        </View>
-        {!isPCD() && (
-          <>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendMarker, { backgroundColor: COLORS.user }]} />
-              <Text style={styles.legendText}>PCD a cargo</Text>
-            </View>
-            {pcdId && (
-              <View style={styles.legendItem}>
-                <View style={[styles.legendMarker, { backgroundColor: COLORS.warning, width: 20, height: 20, borderRadius: 10 }]} />
-                <Text style={styles.legendText}>Persona seleccionada</Text>
-              </View>
-            )}
-          </>
-        )}
-        <View style={styles.legendItem}>
-          <View style={styles.legendCircle} />
-          <Text style={styles.legendText}>Zona segura (500m)</Text>
-        </View>
-      </View>
+      </Animated.View>
     </View>
   );
 }
